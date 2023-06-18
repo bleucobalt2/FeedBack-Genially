@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>FeedBack Genially</title>
+</head>
+<body>
+
+
+<!--Gestion des feedbacks utilisant les fonctionnalités intégrées à Genially-->
+
+
+<!-- Élément de marquage des éléments portant des feedBacks Genially à grouper avec un élément Genially -->
+<div class="aCacher fb" style="background-color:orange; color:white; height: fit-content">Élément de marquage des éléments portant des feedbacks Genially, à grouper avec un élément Genially.</div>
+<script></script>
+
+<div class="aCacher fire" style="background-color:darkseagreen; color:white; height: fit-content">Élément de marquage des éléments déclencheurs de feedbacks.</div>
+<script></script>
+
+<div class="aCacher fg_global" style="background-color:lightcoral; color:white; height: fit-content">Élément de marquage des éléments portant le feedback global, à grouper avec un élément Genially.</div>
+<script></script>
+
+<!-- Compteur de feedback trouvés et nombre de feedbacks total à trouver-->
+<div class="aCacher compteur" style="border: solid green;">Élément compteur. À grouper avec Une zone de texte</div>
+<script></script>
+
+<div class="aCacher total" style="border: solid red;">Élément total. À grouper avec Une zone de texte</div>
+<script></script>
+
+<!-- Les éléments de délais à grouper avec une Zone de Texte contenant le délai en ms : le même pour tous les feedbacks, incrémenté, décrémenté, aléatoire et combinaisons-->
+<div class="aCacher delai delay" style="border: solid blue;">Élément délai. À grouper avec Une zone de texte</div>
+<script></script>
+
+<div class="aCacher delaiInc delay" style="border: solid violet;">Élément délai Incrémenté. À grouper avec Une zone de texte</div>
+<script></script>
+
+<div class="aCacher delaiDec delay" style="border: solid blueviolet;">Élément délai Incrémenté. À grouper avec Une zone de texte</div>
+<script></script>
+
+<div class="aCacher delaiAlea delay" style="border: solid orange;">Élément délai Incrémenté. À grouper avec Une zone de texte</div>
+<script></script>
+
+<div class="aCacher delaiAleaInc delay" style="border: solid lightcoral;">Élément délai Incrémenté. À grouper avec Une zone de texte</div>
+<script></script>
+
+<div class="aCacher delaiAleaDec delay" style="border: solid chocolate;">Élément délai Incrémenté. À grouper avec Une zone de texte</div>
+<script></script>
+
+
+
+<div class="aCacher">Élément contenant la fonction de déclenchement des feedBacks Genially V0.1</div>
+<script>
+
+  const tousLesFB = document.querySelectorAll('.fb');
+  /* fonction qui utilise une promesse pour être sûr qu'un élément est chargé dans la page*/
+  function waitForElement(selector) {
+    return new Promise(function(resolve, reject) {
+      var element = document.querySelector(selector);
+
+      if (element) {
+        resolve(element); // Résout la promesse avec l'élément
+      } else {
+        var observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            var nodes = Array.from(mutation.addedNodes);
+            for (var node of nodes) {
+              if (node.matches && node.matches(selector)) {
+                observer.disconnect();
+                resolve(node); // Résout la promesse avec l'élément
+                return;
+              }
+            }
+          });
+        });
+
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+
+        // Rejette la promesse après un délai de timeout (par exemple, 4 secondes)
+        setTimeout(function() {
+          observer.disconnect();
+          reject(new Error('Timeout: Element not found'));
+        }, 4000);
+      }
+    });
+  }
+  /* fonction qui déclenche le feedBack d'un élément et gère le feedback global si présent*/
+  const declencheFb = (groupe) => {
+    groupe.click();
+    if(document.querySelector('.fg_global')){
+      document.querySelector('.fg_global').dispatchEvent(feedBackGlobal);
+    }
+  };
+  /*Fonction qui donne la même couleur aux éléments déclencheurs et éléments de feedback et les incrémente suivant l'ordre de groupage dans la page*/
+  const marqueElements = (classe) => {
+    let elts = document.querySelectorAll(classe);
+    const aleatoire = () => {
+      return Math.floor(Math.random() * 256);
+    }
+    let i= 0;
+    if(classe === '.fb'){
+      for(let elt of elts){
+        elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+        let classes = elt.classList;
+        classes.add('fb'+i);
+        elt.innerHTML = 'Élément feedback: fb'+i;
+        i++;
+      }
+    }
+    if(classe === '.fire'){
+      for(let elt of elts){
+        elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
+        let classes = elt.classList;
+        classes.add('fb'+i);
+        elt.innerHTML = 'Élément déclencheur: fire'+i;
+        i++;
+      }
+    }
+  }
+
+  /*Définitions des évènements feedBacks global, feedBacks génially personalisés*/
+  let feedBackGlobal = new CustomEvent('feedBackGlobal', {detail: {message: 'feedBackGlobal',
+      tous: tousLesFB.length, trouve :document.querySelectorAll('.fb.active').length}, bubbles: true, cancelable: true});
+
+  let feedBackGenially = new CustomEvent('feedBackGenially', {detail: {message: 'feedBackGenially',
+      trouve: tousLesFB.length}, bubbles: true, cancelable: true});
+
+  /*Fonction qui déclenche les feedBacks génially une fois que ceux-ci sont chargés dans la page, delai par défaut avant déclenchement*/
+  const  attendDeclencheFB= (cla, delai=400) => {
+
+    if(document.querySelector('.container-wrapper-genially')){
+
+      waitForElement('.fb'+cla).then(function(element) {
+        //console.log('L\'élément est chargé :', element);
+        let classes = element.classList;
+        setTimeout(() => {
+          classes.add('active');
+          declencheFb(element.closest('.genially-view-group'));
+        }, delai);
+      })
+        .catch(function(error) {
+          console.error('Erreur :', error);
+        });
+    }
+  };
+
+  /*Marquer et incrémenter les elements de feedbacks et déclencheurs*/
+  marqueElements('.fb');
+  marqueElements('.fire');
+
+  /*Gérer le feedback global et le compteur associé s'ils existent en mode view et preview*/
+  if(document.querySelector('.fg_global')){
+    let global = document.querySelector('.fg_global');
+    let compteur = document.querySelector('.compteur');
+    if(document.querySelector('.container-wrapper-genially') && compteur){
+      var compteurZt = compteur.closest('.genially-view-group').querySelector('.genially-view-text');
+    }
+
+    let total = document.querySelector('.total');
+    if(document.querySelector('.container-wrapper-genially') && total){
+      var totalZt = total.closest('.genially-view-group').querySelector('.genially-view-text');
+    }
+
+    // Initialisation du compteur et du total
+    if(document.querySelector('.container-wrapper-genially') && compteurZt){
+      compteurZt.textContent = '0';
+    }
+    if(document.querySelector('.container-wrapper-genially') && totalZt){
+      totalZt.textContent = tousLesFB.length;
+    }
+
+    global.addEventListener('feedBackGlobal', (event) => {
+      console.log(event.detail.message);
+      if(event.detail.tous === document.querySelectorAll('.fb.active').length){
+        console.log('Tous les éléments feedBacks ont été trouvés: ', event.detail.tous);
+        global.click()
+      }
+      if(document.querySelector('.compteur')){
+        compteur.innerHTML = 'Nombre d\'éléments feedBack trouvés: '+document.querySelectorAll('.fb.active').length;
+        if(compteurZt){
+          compteurZt.textContent = document.querySelectorAll('.fb.active').length
+        }
+      }
+    });
+
+  }
+
+  //Abonnement de tous les éléments feedback à l'événement feedBackGenially et gestions des éléments de delai.
+  for(let i=0; i<tousLesFB.length; i++){
+    document.querySelector('.fb.fb'+i).addEventListener('feedBackGenially', (event) => {
+      console.log(event.detail.message);
+      if(document.querySelector('.delay')){
+        var delai = +document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').textContent;
+      }
+      if(document.querySelector('.delai')){
+        attendDeclencheFB('.fb'+i, delai)
+      }
+      else if(document.querySelector('.delaiInc')){
+        attendDeclencheFB('.fb'+i, delai*i)
+      }
+      else if(document.querySelector('.delaiDec')){
+        attendDeclencheFB('.fb'+i, delai*(tousLesFB.length-i))
+      }
+      else if(document.querySelector('.delaiAlea')){
+        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length))
+      }
+      else if(document.querySelector('.delaiAleaInc')){
+        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length)*i)
+      }
+      else if(document.querySelector('.delaiAleaDec')){
+        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length)*(tousLesFB.length-i))
+      }
+      else{
+        attendDeclencheFB('.fb'+i);
+      }
+    });
+    /*Déclencheurs : s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
+    let groupe =document.querySelector('.fire.fb'+i).closest('.genially-view-group');
+    if (groupe){
+      groupe.addEventListener('click', (event) => {
+        document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
+      });
+    }
+
+  }
+
+
+  /*Masquer les elements en mode view et preview*/
+  if(document.querySelector('.container-wrapper-genially')){
+    let eltsAcacher = document.querySelectorAll('.aCacher');
+    for(let elt of eltsAcacher){
+      elt.style.display = 'none';
+    }
+    if(document.querySelector('.delay')){
+      document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').style.display = 'none';
+    }
+  }
+
+</script>
+
+</body>
+</html>
