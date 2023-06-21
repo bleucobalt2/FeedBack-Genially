@@ -46,9 +46,13 @@
 <div class="aCacher delaiAleaDec delay" style="border: solid chocolate;">Élément délai aléatoire décrémenté. À grouper avec Une zone de texte</div>
 <script></script>
 
+// Pour taguer un élément avec lequel il est groupé et le retrouver
+<div class="aCacher fake" style="border: solid crimson">Fake</div>
+<script></script>
 
 
-<div class="aCacher">Élément contenant la fonction de déclenchement des feedBacks Genially V0.1</div>
+
+<div class="aCacher">Élément contenant la fonction de déclenchement des feedBacks Genially V0.1 + couise</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -214,12 +218,16 @@
       }
     });
     /*Déclencheurs : s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
-    let groupe =document.querySelector('.fire.fb'+i).closest('.genially-view-group');
-    if (groupe){
-      groupe.addEventListener('click', (event) => {
-        document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
-      });
+
+    if(document.querySelector('.fire.fb'+i)){
+      let groupe =document.querySelector('.fire.fb'+i).closest('.genially-view-group');
+      if (groupe){
+        groupe.addEventListener('click', (event) => {
+          document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
+        });
+      }
     }
+
 
   }
 
@@ -233,6 +241,15 @@
     if(document.querySelector('.delay')){
       document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').style.display = 'none';
     }
+    /* Couise avec une question
+    if(document.querySelector('input#q1')){
+      console.log('blur Event');
+      document.querySelector('input#q1').addEventListener('blur', (event) => {
+        console.log('blur');
+        document.querySelector('.fake').closest('.genially-view-group').click();
+      });
+    }*/
+
   }
 
 </script>
