@@ -14,7 +14,10 @@
 <div class="aCacher fb" style="background-color:orange; color:white; height: fit-content">Élément de marquage des éléments portant des feedbacks Genially, à grouper avec un élément Genially.</div>
 <script></script>
 
-<div class="aCacher fire" style="background-color:darkseagreen; color:white; height: fit-content">Élément de marquage des éléments déclencheurs de feedbacks.</div>
+<div class="aCacher fb erreur" style="background-color:orangered; color:white; height: fit-content">Élément feedback-erreur, mais non compté pour le feedback global, à grouper avec un élément Genially.</div>
+<script></script>
+
+<div class="aCacher fire" style="background-color:darkseagreen; color:white; height: fit-content">Élément de marquage des éléments déclencheurs de feedbacks, à grouper avec un élément Genially.</div>
 <script></script>
 
 <div class="aCacher fg_global" style="background-color:lightcoral; color:white; height: fit-content">Élément de marquage de l'élément portant le feedback global, à grouper avec un élément Genially.</div>
@@ -46,13 +49,13 @@
 <div class="aCacher delaiAleaDec delay" style="border: solid chocolate;">Élément délai aléatoire décrémenté. À grouper avec Une zone de texte</div>
 <script></script>
 
-// Pour taguer un élément avec lequel il est groupé et le retrouver
+<!-- Pour taguer un élément avec lequel il est groupé et le retrouver dans la page-->
 <div class="aCacher fake" style="border: solid crimson">Fake</div>
 <script></script>
 
 
 
-<div class="aCacher">Élément contenant la fonction de déclenchement des feedBacks Genially V0.1 + couise</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.3 | 20-07-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -93,6 +96,9 @@
     if(document.querySelector('.fg_global')){
       document.querySelector('.fg_global').dispatchEvent(feedBackGlobal);
     }
+    if(document.querySelector('.compteur')){
+      document.querySelector('.compteur').dispatchEvent(feedBackGlobal);
+    }
   };
   /*Fonction qui donne la même couleur aux éléments déclencheurs et éléments de feedback et les incrémente suivant l'ordre de groupage dans la page*/
   const marqueElements = (classe) => {
@@ -128,18 +134,18 @@
   let feedBackGenially = new CustomEvent('feedBackGenially', {detail: {message: 'feedBackGenially',
       trouve: tousLesFB.length}, bubbles: true, cancelable: true});
 
-  /*Fonction qui déclenche les feedBacks génially une fois que ceux-ci sont chargés dans la page, delai par défaut avant déclenchement*/
+  /*Fonction qui déclenche les feedBacks Genially une fois que ceux-ci sont chargés dans la page, delai par défaut avant déclenchement*/
   const  attendDeclencheFB= (cla, delai=400) => {
-
     if(document.querySelector('.container-wrapper-genially')){
-
       waitForElement('.fb'+cla).then(function(element) {
         //console.log('L\'élément est chargé :', element);
         let classes = element.classList;
-        setTimeout(() => {
-          classes.add('active');
-          declencheFb(element.closest('.genially-view-group'));
-        }, delai);
+        if(!classes.contains('erreur')){
+          setTimeout(() => {
+            classes.add('active');
+            declencheFb(element.closest('.genially-view-group'));
+          }, delai);
+        }
       })
         .catch(function(error) {
           console.error('Erreur :', error);
@@ -152,46 +158,63 @@
   marqueElements('.fire');
 
   /*Gérer le feedback global et le compteur associé s'ils existent en mode view et preview*/
-  if(document.querySelector('.fg_global')){
-    let global = document.querySelector('.fg_global');
+  if(document.querySelector('.compteur')){
     let compteur = document.querySelector('.compteur');
     if(document.querySelector('.container-wrapper-genially') && compteur){
       var compteurZt = compteur.closest('.genially-view-group').querySelector('.genially-view-text');
     }
-
-    let total = document.querySelector('.total');
-    if(document.querySelector('.container-wrapper-genially') && total){
-      var totalZt = total.closest('.genially-view-group').querySelector('.genially-view-text');
-    }
-
-    // Initialisation du compteur et du total
+    // Initialisation du compteur
     if(document.querySelector('.container-wrapper-genially') && compteurZt){
       compteurZt.textContent = '0';
     }
-    if(document.querySelector('.container-wrapper-genially') && totalZt){
-      totalZt.textContent = tousLesFB.length;
+    // Gestion du compteur
+    compteur.addEventListener('feedBackGlobal', () => {
+      if(document.querySelector('.container-wrapper-genially') && compteurZt){
+        compteurZt.textContent = document.querySelectorAll('.fb.active').length.toString();
+      }
+    });
+  }
+
+  /*Gérer le total s'il existe*/
+  if(document.querySelector('.total')){
+    const total = document.querySelector('.total');
+    if(document.querySelector('.container-wrapper-genially') && total){
+      var totalZt = total.closest('.genially-view-group').querySelector('.genially-view-text');
     }
+    //Afficher le total de bonnes réponses sans les erreurs si elles existent
+    if(document.querySelector('.container-wrapper-genially') && totalZt){
+      if(document.querySelector('.fb.erreur')){
+        totalZt.textContent = (tousLesFB.length - document.querySelectorAll('.fb.erreur').length).toString();
+      }
+      else{
+        totalZt.textContent = tousLesFB.length.toString();
+      }
+    }
+  }
+
+  /*Gérer le feedback global s'il existe*/
+  if(document.querySelector('.fg_global')){
+    let global = document.querySelector('.fg_global');
 
     global.addEventListener('feedBackGlobal', (event) => {
-      console.log(event.detail.message);
-      if(event.detail.tous === document.querySelectorAll('.fb.active').length){
-        console.log('Tous les éléments feedBacks ont été trouvés: ', event.detail.tous);
-        global.click()
+      //console.log(event.detail.message);
+      if(document.querySelector('.fb.erreur')){
+        if(event.detail.tous-document.querySelectorAll('.fb.erreur').length === document.querySelectorAll('.fb.active').length){
+          global.click()
+        }
       }
-      if(document.querySelector('.compteur')){
-        compteur.innerHTML = 'Nombre d\'éléments feedBack trouvés: '+document.querySelectorAll('.fb.active').length;
-        if(compteurZt){
-          compteurZt.textContent = document.querySelectorAll('.fb.active').length
+      else{
+        if(event.detail.tous === document.querySelectorAll('.fb.active').length){
+          global.click()
         }
       }
     });
-
   }
 
   //Abonnement de tous les éléments feedback à l'événement feedBackGenially et gestions des éléments de delai.
   for(let i=0; i<tousLesFB.length; i++){
-    document.querySelector('.fb.fb'+i).addEventListener('feedBackGenially', (event) => {
-      console.log(event.detail.message);
+    document.querySelector('.fb.fb'+i).addEventListener('feedBackGenially', () => {
+      //console.log(event.detail.message);
       if(document.querySelector('.delay')){
         var delai = +document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').textContent;
       }
@@ -217,12 +240,12 @@
         attendDeclencheFB('.fb'+i);
       }
     });
-    /*Déclencheurs : s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
 
+    /*Déclencheurs : s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
     if(document.querySelector('.fire.fb'+i)){
       let groupe =document.querySelector('.fire.fb'+i).closest('.genially-view-group');
       if (groupe){
-        groupe.addEventListener('click', (event) => {
+        groupe.addEventListener('click', () => {
           document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
         });
       }
