@@ -151,7 +151,7 @@
     }
   }
 
-  /*Définitions des évènements feedBacks global, feedBacks génially personalisés*/
+  /*Définitions des évènements feedBackGlobal, feedBackGenially, feedBackErreur personnalisés*/
   let feedBackGlobal = new CustomEvent('feedBackGlobal', {detail: {message: 'feedBackGlobal',
       tous: tousLesFB.length, trouve :document.querySelectorAll('.fb.active').length}, bubbles: true, cancelable: true});
 
@@ -276,7 +276,7 @@
     });
   }
 
-  //Abonnement de tous les éléments feedback à l'événement feedBackGenially et gestions des éléments de délai.
+  /* Abonnement de tous les éléments feedback à l'événement feedBackGenially et gestions des éléments de délai.*/
   for(let i=0; i<tousLesFB.length; i++){
     document.querySelector('.fb.fb'+i).addEventListener('feedBackGenially', () => {
       //console.log(event.detail.message);
@@ -316,8 +316,7 @@
       }
     }
 
-
-  }
+  } // fin abonnements
 
 
   /*Masquer les elements en mode view et preview*/
@@ -329,7 +328,7 @@
     if(document.querySelector('.delay')){
       document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').style.display = 'none';
     }
-    /* Couise avec une question et validation au blur. TODO : Intégrer couise avec plusieurs questions
+    /* Couise avec une question et validation au blur. TODO : Intégrer Couise avec plusieurs questions
     if(document.querySelector('input#q1')){
       console.log('blur Event');
       document.querySelector('input#q1').addEventListener('blur', (event) => {
@@ -338,7 +337,7 @@
       });
     }*/
 
-  }
+  } // fin masquer les elements en mode view et preview
 
 </script>
 
