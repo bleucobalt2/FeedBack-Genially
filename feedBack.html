@@ -53,13 +53,16 @@
 <div class="aCacher delaiAleaDec delay" style="border: solid chocolate;">Élément délai aléatoire décrémenté. À grouper avec Une zone de texte</div>
 <script></script>
 
+<div class="aCacher invisible" style="border: solid #0e0c02;">Élément invisible : Rend invisibles les éléments feedBacks</div>
+<script></script>
+
 <!-- Pour taguer un élément avec lequel il est groupé et le retrouver dans la page-->
 <div class="aCacher fake" style="border: solid crimson">Fake</div>
 <script></script>
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.34 | 20-07-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.35 | 22-07-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -327,6 +330,11 @@
     }
     if(document.querySelector('.delay')){
       document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').style.display = 'none';
+    }
+    if(document.querySelector('.invisible')){
+      for(let fb of tousLesFB){
+        fb.closest('.genially-view-group').style.display = 'none';
+      }
     }
     /* Couise avec une question et validation au blur. TODO : Intégrer Couise avec plusieurs questions
     if(document.querySelector('input#q1')){
