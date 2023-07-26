@@ -11,27 +11,27 @@
 
 
 <!-- Élément de marquage des éléments portant des feedBacks Genially à grouper avec un élément Genially -->
-<div class="aCacher fb" style="background-color:orange; color:white; height: fit-content">Élément de marquage des éléments portant des feedbacks Genially, à grouper avec un élément Genially.</div>
+<div class="aCacher fb" style="background-color:orange; color:white;">Élément FEEDBACKS, à grouper avec un élément Genially.</div>
 <script></script>
 
-<div class="aCacher fb erreur" style="background-color:orangered; color:white; height: fit-content">Élément feedback-erreur, mais non compté pour le feedback global, à grouper avec un élément Genially.</div>
+<div class="aCacher fb erreur" style="background-color:orangered; color:white;">Élément FEEDBACK-ERREUR, non compté pour le feedback global, à grouper avec un élément Genially.</div>
 <script></script>
 
-<div class="aCacher fire" style="background-color:darkseagreen; color:white; height: fit-content">Élément de marquage des éléments déclencheurs de feedbacks, à grouper avec un élément Genially.</div>
+<div class="aCacher fire" style="background-color:darkseagreen; color:white;">Élément DÉCLENCHEUR, à grouper avec un élément Genially.</div>
 <script></script>
 
-<div class="aCacher fg_global" style="background-color:lightcoral; color:white; height: fit-content">Élément de marquage de l'élément portant le feedback global, à grouper avec un élément Genially.</div>
+<div class="aCacher fg_global" style="background-color:lightcoral; color:white;">Élément FEEDBACK-GLOBAL, à grouper avec un élément Genially.</div>
 <script></script>
 
 <!-- Compteur de feedback trouvés et nombre de feedbacks total à trouver-->
-<div class="aCacher compteur" style="border: solid green;">Élément compteur. À grouper avec une zone de texte</div>
+<div class="aCacher compteur" style="border: solid green;">COMPTEUR. À grouper avec une zone de texte</div>
 <script></script>
 
-<div class="aCacher total" style="border: solid red;">Élément total. À grouper avec une zone de texte</div>
+<div class="aCacher total" style="border: solid red;">TOTAL. À grouper avec une zone de texte</div>
 <script></script>
 
 <!-- Compteur de feedbacks-erreur qui ont été activés -->
-<div class="aCacher compteurErreur" style="border: solid darkred;">Élément compteur-erreur. À grouper avec une zone de texte</div>
+<div class="aCacher compteurErreur" style="border: solid darkred;">COMPTEUR-ERREUR. À grouper avec une zone de texte</div>
 <script></script>
 
 <!-- Les éléments de délais à grouper avec une Zone de Texte contenant le délai en ms : le même pour tous les feedbacks, incrémenté, décrémenté, aléatoire et combinaisons-->
@@ -62,7 +62,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.35 | 22-07-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.36 | 26-07-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -139,7 +139,7 @@
         elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
         let classes = elt.classList;
         classes.add('fb'+i);
-        elt.innerHTML = 'Élément feedback: fb'+i;
+        elt.innerHTML = 'fb'+i;
         i++;
       }
     }
@@ -148,7 +148,7 @@
         elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
         let classes = elt.classList;
         classes.add('fb'+i);
-        elt.innerHTML = 'Élément déclencheur: fire'+i;
+        elt.innerHTML = 'fire'+i;
         i++;
       }
     }
