@@ -68,7 +68,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.38 | 26-07-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.38 | 28-07-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -343,17 +343,17 @@
     else if(document.querySelector('.visibilite.fb'+i)){
       let groupe =document.querySelector('.visibilite.fb'+i).closest('.genially-view-group');
       if (groupe){
-        console.log('groupe trouvé');
+        //console.log('groupe trouvé');
         let parent = groupe.closest('.genially-animated-wrapper');
         if(parent){
-          console.log('parent trouvé');
+          //console.log('parent trouvé');
           let ancienVisible = parent.style.visibility;
           let ancienDisplay = parent.style.display;
           let observer = new MutationObserver(function(mutations) {
-            console.log(mutations);
+            //console.log(mutations);
             mutations.forEach(function(mutationRecord) {
               if(mutationRecord.attributeName === 'style' && (ancienVisible !== parent.style.visibility || ancienDisplay !== parent.style.display)){
-                console.log('visibility ou display ont changés');
+                //console.log('visibility ou display ont changés');
                 document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
               }
             });
