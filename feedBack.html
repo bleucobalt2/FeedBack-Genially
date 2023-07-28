@@ -17,10 +17,16 @@
 <div class="aCacher fb erreur" style="background-color:orangered; color:white;">Élément FEEDBACK-ERREUR, non compté pour le feedback global, à grouper avec un élément Genially.</div>
 <script></script>
 
-<div class="aCacher fire" style="background-color:darkseagreen; color:white;">Élément DÉCLENCHEUR, à grouper avec un élément Genially.</div>
+<div class="aCacher fg_global" style="background-color:lightcoral; color:white;">Élément FEEDBACK-GLOBAL, à grouper avec un élément Genially.</div>
 <script></script>
 
-<div class="aCacher fg_global" style="background-color:lightcoral; color:white;">Élément FEEDBACK-GLOBAL, à grouper avec un élément Genially.</div>
+<div class="aCacher fire" style="background-color:darkseagreen; color:white;">Élément DÉCLENCHEUR CLIC, à grouper avec un élément Genially.</div>
+<script></script>
+
+<div class="aCacher fire auto" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR AUTO, à grouper avec une zone de texte contenant le nombre de secondes avant déclenchement.</div>
+<script></script>
+
+<div class="aCacher fire visibilite" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR VISIBILITÉ, à grouper avec un élément dont on veut surveiller le changement de visibilité.</div>
 <script></script>
 
 <!-- Compteur de feedback trouvés et nombre de feedbacks total à trouver-->
@@ -62,7 +68,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.36 | 26-07-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.38 | 26-07-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -139,7 +145,7 @@
         elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
         let classes = elt.classList;
         classes.add('fb'+i);
-        elt.innerHTML = 'fb'+i;
+        elt.innerHTML = 'fb-'+i;
         i++;
       }
     }
@@ -148,7 +154,16 @@
         elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
         let classes = elt.classList;
         classes.add('fb'+i);
-        elt.innerHTML = 'fire'+i;
+        if(classes.contains('auto')){
+          elt.innerHTML = 'fire-auto-'+i;
+        }
+        else if(classes.contains('visibilite')){
+          elt.innerHTML = 'fire-visibilite-'+i;
+        }
+        else{
+          elt.innerHTML = 'fire-clic-'+i;
+        }
+        //elt.innerHTML = 'fire'+i;
         i++;
       }
     }
@@ -309,8 +324,48 @@
       }
     });
 
-    /*Déclencheurs : s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
-    if(document.querySelector('.fire.fb'+i)){
+    /*Déclencheurs auto: s'ils existent, les écouter et envoyer l'événement feedbackGenially sur les éléments feedbacks associés*/
+    if(document.querySelector('.auto.fb'+i)){
+      let groupe =document.querySelector('.auto.fb'+i).closest('.genially-view-group');
+      if (groupe){
+        let zoneTexte = groupe.querySelector('.genially-view-text');
+        if(zoneTexte){
+          zoneTexte.style.display = 'none';
+            let delaiSecondes = +zoneTexte.textContent*1000;
+            setTimeout(function(){
+              document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
+            }, delaiSecondes);
+        }
+      }
+    }
+    /*Déclencheurs de visibilité : détecter le changement de visibilité avec MutationObserver sur l'élément parent
+     de classe genially-animated-wrapper. Si l'attribut visibility ou display change envoyer l'événement feedbackGenially sur les éléments associés*/
+    else if(document.querySelector('.visibilite.fb'+i)){
+      let groupe =document.querySelector('.visibilite.fb'+i).closest('.genially-view-group');
+      if (groupe){
+        console.log('groupe trouvé');
+        let parent = groupe.closest('.genially-animated-wrapper');
+        if(parent){
+          console.log('parent trouvé');
+          let ancienVisible = parent.style.visibility;
+          let ancienDisplay = parent.style.display;
+          let observer = new MutationObserver(function(mutations) {
+            console.log(mutations);
+            mutations.forEach(function(mutationRecord) {
+              if(mutationRecord.attributeName === 'style' && (ancienVisible !== parent.style.visibility || ancienDisplay !== parent.style.display)){
+                console.log('visibility ou display ont changés');
+                document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
+              }
+            });
+          });
+          observer.observe(parent, { attributes : true, attributeFilter : ['visibility', 'style'] });
+        }
+      }
+    }
+
+
+    /*Déclencheurs clic: s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
+    else if(document.querySelector('.fire.fb'+i)){
       let groupe =document.querySelector('.fire.fb'+i).closest('.genially-view-group');
       if (groupe){
         groupe.addEventListener('click', () => {
@@ -336,6 +391,7 @@
         fb.closest('.genially-view-group').style.display = 'none';
       }
     }
+
     /* Couise avec une question et validation au blur. TODO : Intégrer Couise avec plusieurs questions
     if(document.querySelector('input#q1')){
       console.log('blur Event');
