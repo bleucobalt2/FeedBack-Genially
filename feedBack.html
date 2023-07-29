@@ -46,7 +46,7 @@
 <div class="aCacher compteurErreur" style="border: solid darkred;">COMPTEUR-ERREUR. À grouper avec une zone de texte</div>
 <script></script>
 
-<!-- Les éléments de délais à grouper avec une Zone de Texte contenant le délai en ms : le même pour tous les feedbacks, incrémenté, décrémenté, aléatoire et combinaisons-->
+<!-- Les éléments de délais à grouper avec une Zone de Texte contenant le délai en s : le même pour tous les feedbacks, incrémenté, décrémenté, aléatoire et combinaisons-->
 <div class="aCacher delai delay" style="border: solid blue;">Élément délai. À grouper avec une zone de texte (nombre de secondes)</div>
 <script></script>
 
@@ -74,7 +74,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.4 | 29-07-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.41 | 29-07-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -104,7 +104,7 @@
         // Rejette la promesse après un délai de timeout (par exemple, 4 secondes)
         setTimeout(function() {
           observer.disconnect();
-          reject(new Error('Timeout: Élement non trouvé après 4s'));
+          reject(new Error('Timeout: Élément non trouvé après 4s'));
         }, 4000);
       }
     });
@@ -123,7 +123,7 @@
   }
 
   /* Fonction qui déclenche le feedBack d'un élément et gère le feedback global, le compteur, le compteur d'erreurs si présents*/
-  /*TODO:  boucle sur declencheFb avec exemple déclencheur + fb + image groupés ???*/
+  /*TODO:  boucle sur déclencheFb avec exemple déclencheur + fb + image groupés ???*/
   const declencheFb = (groupe) => {
     groupe.click();
     if(document.querySelector('.fg_global')){
@@ -345,7 +345,7 @@
       }
     });
 
-    /*Déclencheurs auto: s'ils existent, les écouter et envoyer l'événement feedbackGenially sur les éléments feedbacks associés*/
+    /*Déclencheurs auto : s'ils existent, les écouter et envoyer l'événement feedbackGenially sur les éléments feedbacks associés*/
     if(document.querySelector('.auto.fb'+i)){
       let groupe =document.querySelector('.auto.fb'+i).closest('.genially-view-group');
       if (groupe){
@@ -405,12 +405,12 @@
               }
             });
           });
-          observer.observe(parent, {attributes: true, attributeFilter: ['visibility', 'style']});
+          observer.observe(parent, {attributes: true, attributeFilter: ['style']});
         }
       }
     }
 
-    /*Déclencheurs de clic: s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
+    /*Déclencheurs de clic : s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
     else if(document.querySelector('.fire.fb'+i)){
       let groupe =document.querySelector('.fire.fb'+i).closest('.genially-view-group');
       if (groupe){
