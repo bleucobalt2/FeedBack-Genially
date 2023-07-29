@@ -141,7 +141,7 @@
     }
     let i= 0;
     if(classe === '.fb' &&  elts.length > 0){
-        console.log('fb dans marqueElements');
+        //console.log('fb dans marqueElements');
       for(let elt of elts){
         elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
         let classes = elt.classList;
@@ -151,7 +151,7 @@
       }
     }
     if(classe === '.fire' &&  elts.length > 0){
-      console.log('fire dans marqueElements');
+      //console.log('fire dans marqueElements');
       for(let elt of elts){
         if(document.querySelector('.fb'+i)){
           elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
