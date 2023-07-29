@@ -41,22 +41,22 @@
 <script></script>
 
 <!-- Les éléments de délais à grouper avec une Zone de Texte contenant le délai en ms : le même pour tous les feedbacks, incrémenté, décrémenté, aléatoire et combinaisons-->
-<div class="aCacher delai delay" style="border: solid blue;">Élément délai. À grouper avec Une zone de texte</div>
+<div class="aCacher delai delay" style="border: solid blue;">Élément délai. À grouper avec Une zone de texte (nombre de secondes)</div>
 <script></script>
 
-<div class="aCacher delaiInc delay" style="border: solid violet;">Élément délai Incrémenté. À grouper avec Une zone de texte</div>
+<div class="aCacher delaiInc delay" style="border: solid violet;">Élément délai Incrémenté. À grouper avec Une zone de texte (nombre de secondes)</div>
 <script></script>
 
-<div class="aCacher delaiDec delay" style="border: solid blueviolet;">Élément délai décrémenté. À grouper avec Une zone de texte</div>
+<div class="aCacher delaiDec delay" style="border: solid blueviolet;">Élément délai décrémenté. À grouper avec Une zone de texte (nombre de secondes)</div>
 <script></script>
 
-<div class="aCacher delaiAlea delay" style="border: solid orange;">Élément délai aléatoire. À grouper avec Une zone de texte</div>
+<div class="aCacher delaiAlea delay" style="border: solid orange;">Élément délai aléatoire. À grouper avec Une zone de texte (nombre de secondes)</div>
 <script></script>
 
-<div class="aCacher delaiAleaInc delay" style="border: solid lightcoral;">Élément délai aléatoire incrémenté. À grouper avec Une zone de texte</div>
+<div class="aCacher delaiAleaInc delay" style="border: solid lightcoral;">Élément délai aléatoire incrémenté. À grouper avec Une zone de texte (nombre de secondes)</div>
 <script></script>
 
-<div class="aCacher delaiAleaDec delay" style="border: solid chocolate;">Élément délai aléatoire décrémenté. À grouper avec Une zone de texte</div>
+<div class="aCacher delaiAleaDec delay" style="border: solid chocolate;">Élément délai aléatoire décrémenté. À grouper avec Une zone de texte (nombre de secondes)</div>
 <script></script>
 
 <div class="aCacher invisible" style="border: solid #0e0c02;">Élément invisible : Rend invisibles les éléments feedBacks</div>
@@ -68,7 +68,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.391 | 29-07-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.392 | 29-07-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -314,22 +314,22 @@
         var delai = +document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').textContent;
       }
       if(document.querySelector('.delai')){
-        attendDeclencheFB('.fb'+i, delai)
+        attendDeclencheFB('.fb'+i, delai*1000)
       }
       else if(document.querySelector('.delaiInc')){
-        attendDeclencheFB('.fb'+i, delai*i)
+        attendDeclencheFB('.fb'+i, delai*i*1000)
       }
       else if(document.querySelector('.delaiDec')){
-        attendDeclencheFB('.fb'+i, delai*(tousLesFB.length-i))
+        attendDeclencheFB('.fb'+i, delai*(tousLesFB.length-i)*1000)
       }
       else if(document.querySelector('.delaiAlea')){
-        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length))
+        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length)*1000)
       }
       else if(document.querySelector('.delaiAleaInc')){
-        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length)*i)
+        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length)*i*1000)
       }
       else if(document.querySelector('.delaiAleaDec')){
-        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length)*(tousLesFB.length-i))
+        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length)*(tousLesFB.length-i)*1000)
       }
       else{
         attendDeclencheFB('.fb'+i);
