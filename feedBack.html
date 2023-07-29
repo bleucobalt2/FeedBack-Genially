@@ -68,7 +68,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.38 | 28-07-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.391 | 29-07-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -140,7 +140,8 @@
       return Math.floor(Math.random() * 256);
     }
     let i= 0;
-    if(classe === '.fb'){
+    if(classe === '.fb' &&  elts.length > 0){
+        console.log('fb dans marqueElements');
       for(let elt of elts){
         elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
         let classes = elt.classList;
@@ -149,9 +150,16 @@
         i++;
       }
     }
-    if(classe === '.fire'){
+    if(classe === '.fire' &&  elts.length > 0){
+      console.log('fire dans marqueElements');
       for(let elt of elts){
-        elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
+        if(document.querySelector('.fb'+i)){
+          elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
+        }
+        else{
+          elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+        }
+        //elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
         let classes = elt.classList;
         classes.add('fb'+i);
         if(classes.contains('auto')){
@@ -192,7 +200,6 @@
               //console.log('Déclenchement', element);
               declencheFb(element.closest('.genially-view-group'));
             }
-            //declencheFb(element.closest('.genially-view-group'));
           }, delai);
         }
         else if(classes.contains('erreur')){
@@ -213,8 +220,13 @@
   };
 
   /*Marquer et incrémenter les elements de feedbacks et déclencheurs*/
-  marqueElements('.fb');
-  marqueElements('.fire');
+  if(document.querySelectorAll('.fb').length > 0){
+    marqueElements('.fb');
+  }
+  if(document.querySelectorAll('.fire').length > 0){
+    marqueElements('.fire');
+  }
+
 
   /*Gérer le feedback global et le compteur associé s'ils existent en mode view et preview*/
   if(document.querySelector('.compteur')){
@@ -338,6 +350,7 @@
         }
       }
     }
+
     /*Déclencheurs de visibilité : détecter le changement de visibilité avec MutationObserver sur l'élément parent
      de classe genially-animated-wrapper. Si l'attribut visibility ou display change envoyer l'événement feedbackGenially sur les éléments associés*/
     else if(document.querySelector('.visibilite.fb'+i)){
@@ -358,13 +371,12 @@
               }
             });
           });
-          observer.observe(parent, { attributes : true, attributeFilter : ['visibility', 'style'] });
+          observer.observe(parent, { attributes : true, attributeFilter : ['style'] });
         }
       }
     }
 
-
-    /*Déclencheurs clic: s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
+    /*Déclencheurs de clic: s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
     else if(document.querySelector('.fire.fb'+i)){
       let groupe =document.querySelector('.fire.fb'+i).closest('.genially-view-group');
       if (groupe){
@@ -392,14 +404,6 @@
       }
     }
 
-    /* Couise avec une question et validation au blur. TODO : Intégrer Couise avec plusieurs questions
-    if(document.querySelector('input#q1')){
-      console.log('blur Event');
-      document.querySelector('input#q1').addEventListener('blur', (event) => {
-        console.log('blur');
-        document.querySelector('.fake').closest('.genially-view-group').click();
-      });
-    }*/
 
   } // fin masquer les elements en mode view et preview
 
