@@ -29,6 +29,12 @@
 <div class="aCacher fire visibilite" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR VISIBILITÉ, à grouper avec un élément dont on veut surveiller le changement de visibilité.</div>
 <script></script>
 
+
+<div class="aCacher fire autoFB fb" style="background-color:darkseagreen; color:white;">AUTODÉCLENCHEUR VISIBILITÉ, à grouper avec un élément dont le feedback doit être déclencher au changement de visibilité.</div>
+<script></script>
+
+
+
 <!-- Compteur de feedback trouvés et nombre de feedbacks total à trouver-->
 <div class="aCacher compteur" style="border: solid green;">COMPTEUR. À grouper avec une zone de texte</div>
 <script></script>
@@ -68,7 +74,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.392 | 29-07-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.4 | 29-07-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -164,6 +170,9 @@
         classes.add('fb'+i);
         if(classes.contains('auto')){
           elt.innerHTML = 'fire-auto-'+i;
+        }
+        else if (classes.contains('autoFB')) {
+          elt.innerHTML = 'autoFB-' + i;
         }
         else if(classes.contains('visibilite')){
           elt.innerHTML = 'fire-visibilite-'+i;
@@ -372,6 +381,31 @@
             });
           });
           observer.observe(parent, { attributes : true, attributeFilter : ['style'] });
+        }
+      }
+    }
+
+    /*AutoDéclencheurs de visibilité : détecter le changement de visibilité avec MutationObserver sur l'élément parent
+  de classe genially-animated-wrapper. Si l'attribut visibility ou display change envoyer l'événement feedbackGenially sur les éléments associés*/
+    else if (document.querySelector('.autoFB.fb' + i)) {
+      let groupe = document.querySelector('.autoFB.fb' + i).closest('.genially-view-group');
+      if (groupe) {
+        //console.log('groupe trouvé');
+        let parent = groupe.closest('.genially-animated-wrapper');
+        if (parent) {
+          //console.log('parent trouvé');
+          let ancienVisible = parent.style.visibility;
+          let ancienDisplay = parent.style.display;
+          let observer = new MutationObserver(function (mutations) {
+            //console.log(mutations);
+            mutations.forEach(function (mutationRecord) {
+              if (mutationRecord.attributeName === 'style' && (ancienVisible !== parent.style.visibility || ancienDisplay !== parent.style.display)) {
+                //console.log('visibility ou display ont changés');
+                document.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+              }
+            });
+          });
+          observer.observe(parent, {attributes: true, attributeFilter: ['visibility', 'style']});
         }
       }
     }
