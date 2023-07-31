@@ -74,7 +74,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.41 | 29-07-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.42 | 31-07-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -126,9 +126,9 @@
   /*TODO:  boucle infinie sur déclencheur + fb ??? fixé pour autoVisibilité*/
   const declencheFb = (groupe) => {
     groupe.click();
-    console.log('déclenchement de ' + groupe.className);
+    //console.log('déclenchement de ' + groupe.className);
     if(document.querySelector('.fg_global')){
-      console.log('fg_global');
+      //console.log('fg_global');
       document.querySelector('.fg_global').dispatchEvent(feedBackGlobal);
     }
     if(document.querySelector('.compteur')){
