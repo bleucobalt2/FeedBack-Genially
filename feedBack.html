@@ -123,11 +123,12 @@
   }
 
   /* Fonction qui déclenche le feedBack d'un élément et gère le feedback global, le compteur, le compteur d'erreurs si présents*/
-  /*TODO:  boucle sur déclencheFb avec exemple déclencheur + fb + image groupés ???*/
+  /*TODO:  boucle infinie sur déclencheur + fb ??? fixé pour autoVisibilité*/
   const declencheFb = (groupe) => {
     groupe.click();
+    console.log('déclenchement de ' + groupe.className);
     if(document.querySelector('.fg_global')){
-      //console.log('fg_global');
+      console.log('fg_global');
       document.querySelector('.fg_global').dispatchEvent(feedBackGlobal);
     }
     if(document.querySelector('.compteur')){
@@ -388,6 +389,11 @@
     /*AutoDéclencheurs de visibilité : détecter le changement de visibilité avec MutationObserver sur l'élément parent
   de classe genially-animated-wrapper. Si l'attribut visibility ou display change envoyer l'événement feedbackGenially sur les éléments associés*/
     else if (document.querySelector('.autoFB.fb' + i)) {
+
+      const unSeuleDispatch = once(function () {
+        document.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+      });
+
       let groupe = document.querySelector('.autoFB.fb' + i).closest('.genially-view-group');
       if (groupe) {
         //console.log('groupe trouvé');
@@ -401,7 +407,8 @@
             mutations.forEach(function (mutationRecord) {
               if (mutationRecord.attributeName === 'style' && (ancienVisible !== parent.style.visibility || ancienDisplay !== parent.style.display)) {
                 //console.log('visibility ou display ont changés');
-                document.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+                //document.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+                unSeuleDispatch();
               }
             });
           });
