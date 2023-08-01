@@ -14,7 +14,7 @@
 <div class="aCacher fb" style="background-color:orange; color:white;">Élément FEEDBACKS, à grouper avec un élément Genially.</div>
 <script></script>
 
-<div class="aCacher fb erreur" style="background-color:orangered; color:white;">Élément FEEDBACK-ERREUR, non compté pour le feedback global, à grouper avec un élément Genially.</div>
+<div class="aCacher fb erreur" style="background-color:orangered; color:white; border:solid orangered;">Élément FEEDBACK-ERREUR, non compté pour le feedback global, à grouper avec un élément Genially.</div>
 <script></script>
 
 <div class="aCacher fg_global" style="background-color:lightcoral; color:white;">Élément FEEDBACK-GLOBAL, à grouper avec un élément Genially.</div>
@@ -30,9 +30,11 @@
 <script></script>
 
 
-<div class="aCacher fire autoFB fb" style="background-color:darkseagreen; color:white;">AUTODÉCLENCHEUR VISIBILITÉ, à grouper avec un élément dont le feedback doit être déclenché au changement de visibilité.</div>
+<div class="aCacher fire autoFB fb" style="background-color:darkseagreen; color:white;">AUTODÉCLENCHEUR VISIBILITÉ CLIC, à grouper avec un élément dont le feedback doit être déclenché au changement de visibilité ou au clic.</div>
 <script></script>
 
+<div class="aCacher fire autoFB fb erreur" style="background-color:darkseagreen; color:white; border:solid orangered">AUTODÉCLENCHEUR ERREUR VISIBILITÉ CLIC, à grouper avec un élément dont le feedback doit être déclenché au clic.</div>
+<script></script>
 
 
 <!-- Compteur de feedback trouvés et nombre de feedbacks total à trouver-->
@@ -74,7 +76,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.42 | 31-07-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.44 | 01-08-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -160,7 +162,7 @@
     if(classe === '.fire' &&  elts.length > 0){
       //console.log('fire dans marqueElements');
       for(let elt of elts){
-        if(document.querySelector('.fb'+i)){
+        if(document.querySelector('.fb'+i)+'not(.autoFB)'){
           elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
         }
         else{
@@ -170,10 +172,17 @@
         let classes = elt.classList;
         classes.add('fb'+i);
         if(classes.contains('auto')){
-          elt.innerHTML = 'fire-auto-'+i;
+          elt.innerHTML = 'fire-auto-time'+i;
         }
         else if (classes.contains('autoFB')) {
-          elt.innerHTML = 'autoFB-' + i;
+          elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+          if(classes.contains('erreur')){
+            elt.innerHTML = 'fire-autoFB-erreur-'+i;
+          }
+          else{
+            elt.innerHTML = 'fire-autoFB-'+i;
+          }
+          //elt.innerHTML = 'autoFB-' + i;
         }
         else if(classes.contains('visibilite')){
           elt.innerHTML = 'fire-visibilite-'+i;
@@ -212,11 +221,13 @@
             }
           }, delai);
         }
-        else if(classes.contains('erreur')){
+        else{
+        //else if(classes.contains('erreur')){
+          //console.log('Elément contient la classe "erreur', element);
           setTimeout(() => {
             classes.add('err');
             if(element){
-              //console.log('Erreur', element);
+              //console.log('Erreur déclenchée', element);
               declencheFb(element.closest('.genially-view-group'));
             }
             //declencheFb(element.closest('.genially-view-group'));
@@ -318,8 +329,8 @@
 
   /* Abonnement de tous les éléments feedback à l'événement feedBackGenially et gestions des éléments de délai.*/
   for(let i=0; i<tousLesFB.length; i++){
-    document.querySelector('.fb.fb'+i).addEventListener('feedBackGenially', () => {
-      //console.log(event.detail.message);
+    document.querySelector('.fb.fb'+i).addEventListener('feedBackGenially', (e) => {
+      //console.log(e.target.classList);
       if(document.querySelector('.delay')){
         var delai = +document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').textContent;
       }
@@ -344,7 +355,7 @@
       else{
         attendDeclencheFB('.fb'+i);
       }
-    });
+    }, {once: true});
 
     /*Déclencheurs auto : s'ils existent, les écouter et envoyer l'événement feedbackGenially sur les éléments feedbacks associés*/
     if(document.querySelector('.auto.fb'+i)){
@@ -390,8 +401,10 @@
   de classe genially-animated-wrapper. Si l'attribut visibility ou display change envoyer l'événement feedbackGenially sur les éléments associés*/
     else if (document.querySelector('.autoFB.fb' + i)) {
 
-      const unSeuleDispatch = once(function () {
-        document.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+      const unSeulDispatch = once(function () {
+        //document.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+        let groupe = document.querySelector('.autoFB.fb' + i).closest('.genially-view-group')
+        groupe.dispatchEvent(feedBackGenially);
       });
 
       let groupe = document.querySelector('.autoFB.fb' + i).closest('.genially-view-group');
@@ -406,14 +419,15 @@
             //console.log(mutations);
             mutations.forEach(function (mutationRecord) {
               if (mutationRecord.attributeName === 'style' && (ancienVisible !== parent.style.visibility || ancienDisplay !== parent.style.display)) {
-                //console.log('visibility ou display ont changés');
-                //document.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
-                unSeuleDispatch();
+                groupe.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
               }
             });
           });
           observer.observe(parent, {attributes: true, attributeFilter: ['style']});
         }
+        groupe.addEventListener('click', () => {
+          groupe.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+        });
       }
     }
 
