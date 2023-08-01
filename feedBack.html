@@ -20,6 +20,8 @@
 <div class="aCacher fg_global" style="background-color:lightcoral; color:white;">Élément FEEDBACK-GLOBAL, à grouper avec un élément Genially.</div>
 <script></script>
 
+
+<!-- Les éléments déclencheurs-->
 <div class="aCacher fire" style="background-color:darkseagreen; color:white;">Élément DÉCLENCHEUR CLIC, à grouper avec un élément Genially.</div>
 <script></script>
 
@@ -30,11 +32,13 @@
 <script></script>
 
 
+<!-- Les éléments AUTO : déclencheurs - feedBacks -->
 <div class="aCacher fire autoFB fb" style="background-color:darkseagreen; color:white;">AUTODÉCLENCHEUR VISIBILITÉ CLIC, à grouper avec un élément dont le feedback doit être déclenché au changement de visibilité ou au clic.</div>
 <script></script>
 
-<div class="aCacher fire autoFB fb erreur" style="background-color:darkseagreen; color:white; border:solid orangered">AUTODÉCLENCHEUR ERREUR VISIBILITÉ CLIC, à grouper avec un élément dont le feedback doit être déclenché au clic.</div>
+<div class="aCacher fire autoFB fb erreur" style="background-color:darkseagreen; color:white; border:solid orangered">AUTODÉCLENCHEUR ERREUR VISIBILITÉ CLIC, à grouper avec un élément dont le feedback doit être déclenché au changement de visibilité ou  au clic, mais non compté pour le fb global.</div>
 <script></script>
+
 
 
 <!-- Compteur de feedback trouvés et nombre de feedbacks total à trouver-->
@@ -125,8 +129,9 @@
   }
 
   /* Fonction qui déclenche le feedBack d'un élément et gère le feedback global, le compteur, le compteur d'erreurs si présents*/
-  /*TODO:  boucle infinie sur déclencheur + fb ??? fixé pour autoVisibilité*/
+  /*TODO:  boucle infinie sur déclencheur + fb ??? fixé pour autoVisibilité, autoFB et autoFB-erreur*/
   const declencheFb = (groupe) => {
+    //console.log('déclenchement de ' + groupe.querySelector('.fb').classList);
     groupe.click();
     //console.log('déclenchement de ' + groupe.className);
     if(document.querySelector('.fg_global')){
@@ -230,7 +235,6 @@
               //console.log('Erreur déclenchée', element);
               declencheFb(element.closest('.genially-view-group'));
             }
-            //declencheFb(element.closest('.genially-view-group'));
           }, delai);
         }
       })
