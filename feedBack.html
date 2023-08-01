@@ -31,6 +31,9 @@
 <div class="aCacher fire visibilite" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR VISIBILITÉ, à grouper avec un élément dont on veut surveiller le changement de visibilité.</div>
 <script></script>
 
+<div class="aCacher fire hover" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR SURVOL, à grouper avec un élément Genially.</div>
+<script></script>
+
 
 <!-- Les éléments AUTO : déclencheurs - feedBacks -->
 <div class="aCacher fire autoFB fb" style="background-color:darkseagreen; color:white;">AUTODÉCLENCHEUR VISIBILITÉ CLIC, à grouper avec un élément dont le feedback doit être déclenché au changement de visibilité ou au clic.</div>
@@ -131,7 +134,7 @@
   /* Fonction qui déclenche le feedBack d'un élément et gère le feedback global, le compteur, le compteur d'erreurs si présents*/
   /*TODO:  boucle infinie sur déclencheur + fb ??? fixé pour autoVisibilité, autoFB et autoFB-erreur*/
   const declencheFb = (groupe) => {
-    //console.log('déclenchement de ' + groupe.querySelector('.fb').classList);
+    console.log('déclenchement de ' + groupe.querySelector('.fb').classList);
     groupe.click();
     //console.log('déclenchement de ' + groupe.className);
     if(document.querySelector('.fg_global')){
@@ -157,20 +160,27 @@
     if(classe === '.fb' &&  elts.length > 0){
         //console.log('fb dans marqueElements');
       for(let elt of elts){
-        elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
-        let classes = elt.classList;
-        classes.add('fb'+i);
-        elt.innerHTML = 'fb-'+i;
-        i++;
+        if(!elt.classList.contains('autoFB')){
+          elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+          let classes = elt.classList;
+          classes.add('fb'+i);
+          elt.innerHTML = 'fb-'+i;
+          i++;
+        }
       }
     }
     if(classe === '.fire' &&  elts.length > 0){
       //console.log('fire dans marqueElements');
       for(let elt of elts){
-        if(document.querySelector('.fb'+i)+'not(.autoFB)'){
-          elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
+
+        if(document.querySelector('.fb.fb'+i) && !elt.classList.contains('autoFB')){
+          elt.style.backgroundColor = document.querySelector('.fb.fb'+i).style.backgroundColor;
+        }
+        else if(elt.classList.contains('autoFB')){
+          elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
         }
         else{
+          console.log('Il manque un élément feedBack de même indice pour attribuer la couleur correspondante à ' + elt.innerHTML);
           elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
         }
         //elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
@@ -191,6 +201,9 @@
         }
         else if(classes.contains('visibilite')){
           elt.innerHTML = 'fire-visibilite-'+i;
+        }
+        else if(classes.contains('hover')){
+          elt.innerHTML = 'fire-hover-'+i;
         }
         else{
           elt.innerHTML = 'fire-clic-'+i;
@@ -431,6 +444,18 @@
         }
         groupe.addEventListener('click', () => {
           groupe.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+        });
+      }
+    }
+    /* Déclencheurs au survol des éléments fire contenant la classe hover : les écouter et envoyer l'événement feedbackGenially au survol des éléments feedbacks associés*/
+    else if(document.querySelector('.hover.fb'+i)){
+      let groupe =document.querySelector('.hover.fb'+i).closest('.genially-view-group');
+      if (groupe){
+        groupe.addEventListener('mouseover', () => {
+          document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
+        });
+        groupe.addEventListener('mouseout', () => {
+          !document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
         });
       }
     }
