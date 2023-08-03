@@ -83,7 +83,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.441 | 01-08-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.45 | 03-08-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -135,7 +135,10 @@
   /*TODO:  boucle infinie sur déclencheur + fb ??? fixé pour autoVisibilité, autoFB et autoFB-erreur*/
   const declencheFb = (groupe) => {
     console.log('déclenchement de ' + groupe.querySelector('.fb').classList);
+    //groupe.style.pointerEvents = 'auto';
     groupe.click();
+    //groupe.style.pointerEvents = 'none';
+
     //console.log('déclenchement de ' + groupe.className);
     if(document.querySelector('.fg_global')){
       //console.log('fg_global');
@@ -473,16 +476,35 @@
   } // fin abonnements
 
 
+  /*Fonction desactiveClicDirect(elt) : ajoute le style pointer-events :none s'il n'existe pas*/
+  function desactiveClicDirect(elt){
+    //console.log('desactiveClicDirect', elt);
+    if(!elt.style.pointerEvents){
+      elt.style.pointerEvents = 'none';
+    }
+  }
+
+  /*Fonction remonteArbre(depart, arrive, callback) : remote l'arbre DOM depuis l'élément DOM depart
+    jusqu'à element arrive en applicant un callback à chaque noeud parent*/
+  function remonteArbre(depart, arrive, callback){
+    let noeud = depart;
+    while(noeud && noeud !== arrive){
+      callback(noeud);
+      noeud = noeud.parentNode;
+    }
+  }
+
+
+
   /*Masquer les elements en mode view et preview*/
   if(document.querySelector('.container-wrapper-genially')){
     waitForElement('.aCacher').then(function(){
       let eltsAcacher = document.querySelectorAll('.aCacher');
       for(let elt of eltsAcacher){
         //elt.style.display = 'none';
-        //gaw.style.display = 'none';
         elt.closest('.genially-view-rich-content').style.display ='none';
         if(elt.closest(' .genially-view-cursor-pointer')){
-          console.log('cacher le curseur sur :', elt.closest(' .genially-view-cursor-pointer'));
+          //console.log('cacher le curseur sur :', elt.closest(' .genially-view-cursor-pointer'));
           elt.closest(' .genially-view-cursor-pointer').classList.remove('genially-view-cursor-pointer');
         }
       }
@@ -495,25 +517,22 @@
           fb.closest('.genially-view-group').style.display = 'none';
         }
       }
-    });
-    /*let eltsAcacher = document.querySelectorAll('.aCacher');
-    for(let elt of eltsAcacher){
-      //elt.style.display = 'none';
-      //gaw.style.display = 'none';
-      elt.closest('.genially-view-rich-content').style.display ='none';
-      if(elt.closest(' .genially-view-cursor-pointer')){
-        console.log('elt à cacher', elt.closest(' .genially-view-cursor-pointer'));
-        elt.closest(' .genially-view-cursor-pointer').classList.remove('genially-view-cursor-pointer');
-      }
-    }
-    if(document.querySelector('.delay')){
-      document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').style.display = 'none';
-    }
-    if(document.querySelector('.invisible')){
+      /*Pour tous les éléments de classe fb qui ne contiennent qui ne contiennent pas la classe autoFB remonter l'arbre
+       en appliquant le callback desactiveClicDirect*/
       for(let fb of tousLesFB){
-        fb.closest('.genially-view-group').style.display = 'none';
+        if(!fb.classList.contains('autoFB')){
+          remonteArbre(fb, fb.closest('.genially-animated-wrapper'), desactiveClicDirect);
+        }
       }
-    }*/
+      if(document.querySelector('.fg_global')){
+        let fgGlobal = document.querySelector('.fg_global');
+        remonteArbre(fgGlobal, fgGlobal.closest('.genially-animated-wrapper'), desactiveClicDirect);
+      }
+
+
+    });// fin de then
+
+    /*ancienne version cacher : v.044 du01/08*/
 
 
   } // fin masquer les elements en mode view et preview
