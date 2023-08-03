@@ -83,7 +83,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.44 | 01-08-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.441 | 01-08-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -475,9 +475,36 @@
 
   /*Masquer les elements en mode view et preview*/
   if(document.querySelector('.container-wrapper-genially')){
-    let eltsAcacher = document.querySelectorAll('.aCacher');
+    waitForElement('.aCacher').then(function(){
+      let eltsAcacher = document.querySelectorAll('.aCacher');
+      for(let elt of eltsAcacher){
+        //elt.style.display = 'none';
+        //gaw.style.display = 'none';
+        elt.closest('.genially-view-rich-content').style.display ='none';
+        if(elt.closest(' .genially-view-cursor-pointer')){
+          console.log('cacher le curseur sur :', elt.closest(' .genially-view-cursor-pointer'));
+          elt.closest(' .genially-view-cursor-pointer').classList.remove('genially-view-cursor-pointer');
+        }
+      }
+      if(document.querySelector('.delay')){
+        document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').style.display = 'none';
+      }
+      if(document.querySelector('.invisible')){
+        for(let fb of tousLesFB){
+          // A vérifier
+          fb.closest('.genially-view-group').style.display = 'none';
+        }
+      }
+    });
+    /*let eltsAcacher = document.querySelectorAll('.aCacher');
     for(let elt of eltsAcacher){
-      elt.style.display = 'none';
+      //elt.style.display = 'none';
+      //gaw.style.display = 'none';
+      elt.closest('.genially-view-rich-content').style.display ='none';
+      if(elt.closest(' .genially-view-cursor-pointer')){
+        console.log('elt à cacher', elt.closest(' .genially-view-cursor-pointer'));
+        elt.closest(' .genially-view-cursor-pointer').classList.remove('genially-view-cursor-pointer');
+      }
     }
     if(document.querySelector('.delay')){
       document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').style.display = 'none';
@@ -486,7 +513,7 @@
       for(let fb of tousLesFB){
         fb.closest('.genially-view-group').style.display = 'none';
       }
-    }
+    }*/
 
 
   } // fin masquer les elements en mode view et preview
