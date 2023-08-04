@@ -83,7 +83,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.45 | 03-08-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.46 | 03-08-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -477,32 +477,38 @@
 
 
   /*Fonction desactiveClicDirect(elt) : ajoute le style pointer-events :none s'il n'existe pas*/
-  function desactiveClicDirect(elt){
+  const desactiveClicDirect = elt => {
     //console.log('desactiveClicDirect', elt);
     if(!elt.style.pointerEvents){
       elt.style.pointerEvents = 'none';
     }
-  }
+  };
 
   /*Fonction remonteArbre(depart, arrive, callback) : remote l'arbre DOM depuis l'élément DOM depart
     jusqu'à element arrive en applicant un callback à chaque noeud parent*/
-  function remonteArbre(depart, arrive, callback){
+  const remonteArbre = (depart, arrive, callback) => {
     let noeud = depart;
     while(noeud && noeud !== arrive){
       callback(noeud);
       noeud = noeud.parentNode;
     }
-  }
+  };
 
 
 
-  /*Masquer les elements en mode view et preview*/
+  /*Masquer les elements en mode view et preview, attendre que genially ait compilé*/
   if(document.querySelector('.container-wrapper-genially')){
     waitForElement('.aCacher').then(function(){
       let eltsAcacher = document.querySelectorAll('.aCacher');
       for(let elt of eltsAcacher){
         //elt.style.display = 'none';
-        elt.closest('.genially-view-rich-content').style.display ='none';
+        if(!elt.classList.contains('fire')){
+          elt.closest('.genially-view-rich-content').style.display ='none';
+        }
+        else{
+          elt.style.display = 'none';
+        }
+        //elt.closest('.genially-view-rich-content').style.display ='none';
         if(elt.closest(' .genially-view-cursor-pointer')){
           //console.log('cacher le curseur sur :', elt.closest(' .genially-view-cursor-pointer'));
           elt.closest(' .genially-view-cursor-pointer').classList.remove('genially-view-cursor-pointer');
@@ -513,7 +519,7 @@
       }
       if(document.querySelector('.invisible')){
         for(let fb of tousLesFB){
-          // A vérifier
+          // À vérifier : suffisant pour cacher les éléments fb avec invisible ?
           fb.closest('.genially-view-group').style.display = 'none';
         }
       }
