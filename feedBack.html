@@ -77,13 +77,16 @@
 <div class="aCacher invisible" style="border: solid #0e0c02;">Élément invisible : Rend invisibles les éléments feedBacks</div>
 <script></script>
 
+<div class="aCacher invisibleCertains" style="border: solid #0e0c02;">Élément invisible-certains : Rend invisibles certains éléments feedBacks. À grouper avec une zone de texte (index des FeedBacks à rendre invisibles, séparés par une virgule)</div>
+<script></script>
+
 <!-- Pour taguer un élément avec lequel il est groupé et le retrouver dans la page-->
 <div class="aCacher fake" style="border: solid crimson">Fake</div>
 <script></script>
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.47 | 06-08-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.48 | 06-08-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -525,6 +528,19 @@
           fb.closest('.genially-view-group').style.display = 'none';
         }
       }
+      if(document.querySelector('.invisibleCertains')){
+        if (document.querySelector('.invisibleCertains').closest('.genially-view-group').querySelector('.genially-view-text')){
+          let fbACacher = document.querySelector('.invisibleCertains').closest('.genially-view-group').querySelector('.genially-view-text').textContent.trim(',').split(',');
+          for(let fbaC of fbACacher){
+            //console.log('fbaC', document.querySelector('.fb.fb'+fbaC));
+            if(document.querySelector('.fb.fb'+fbaC)){
+              document.querySelector('.fb.fb'+fbaC).closest('.genially-view-group').style.display = 'none';
+            }
+          }
+        }
+      }
+
+
       /*Pour tous les éléments de classe fb qui ne contiennent qui ne contiennent pas la classe autoFB remonter l'arbre
        en appliquant le callback desactiveClicDirect*/
       for(let fb of tousLesFB){
