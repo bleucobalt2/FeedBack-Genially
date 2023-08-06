@@ -83,7 +83,7 @@
 
 
 
-<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.46 | 03-08-23</div>
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.47 | 06-08-23</div>
 <script>
 
   const tousLesFB = document.querySelectorAll('.fb');
@@ -349,8 +349,10 @@
 
   /* Abonnement de tous les éléments feedback à l'événement feedBackGenially et gestions des éléments de délai.*/
   for(let i=0; i<tousLesFB.length; i++){
+    let onceOrNot= document.querySelector('.fb.fb'+i).classList.contains('autoFB');
+    console.log(onceOrNot);
     document.querySelector('.fb.fb'+i).addEventListener('feedBackGenially', (e) => {
-      //console.log(e.target.classList);
+      console.log(e.target.classList);
       if(document.querySelector('.delay')){
         var delai = +document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').textContent;
       }
@@ -375,7 +377,7 @@
       else{
         attendDeclencheFB('.fb'+i);
       }
-    }, {once: true});
+    }, {once:onceOrNot});
 
     /*Déclencheurs auto : s'ils existent, les écouter et envoyer l'événement feedbackGenially sur les éléments feedbacks associés*/
     if(document.querySelector('.auto.fb'+i)){
