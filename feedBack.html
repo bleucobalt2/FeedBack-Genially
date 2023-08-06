@@ -530,6 +530,7 @@
       }
       if(document.querySelector('.invisibleCertains')){
         if (document.querySelector('.invisibleCertains').closest('.genially-view-group').querySelector('.genially-view-text')){
+          document.querySelector('.invisibleCertains').closest('.genially-view-group').querySelector('.genially-view-text').style.display = 'none';
           let fbACacher = document.querySelector('.invisibleCertains').closest('.genially-view-group').querySelector('.genially-view-text').textContent.trim(',').split(',');
           for(let fbaC of fbACacher){
             //console.log('fbaC', document.querySelector('.fb.fb'+fbaC));
