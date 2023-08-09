@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>FeedBack Genially</title>
+</head>
+<body>
+
+
+<!--Gestion des feedbacks utilisant les fonctionnalités intégrées à Genially-->
+
+
+<!-- Élément de marquage des éléments portant des feedBacks Genially à grouper avec un élément Genially -->
+<div class="aCacher fb" style="background-color:orange; color:white;">Élément FEEDBACKS, à grouper avec un élément Genially.</div>
+<script></script>
+
+<div class="aCacher fb erreur" style="background-color:orangered; color:white; border:solid orangered;">Élément FEEDBACK-ERREUR, non compté pour le feedback global, à grouper avec un élément Genially.</div>
+<script></script>
+
+<div class="aCacher fg_global" style="background-color:lightcoral; color:white;">Élément FEEDBACK-GLOBAL, à grouper avec un élément Genially.</div>
+<script></script>
+
+
+<!-- Les éléments déclencheurs-->
+<div class="aCacher fire" style="background-color:darkseagreen; color:white;">Élément DÉCLENCHEUR CLIC, à grouper avec un élément Genially.</div>
+<script></script>
+
+<div class="aCacher fire auto" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR AUTO, à grouper avec une zone de texte contenant le nombre de secondes avant déclenchement.</div>
+<script></script>
+
+<div class="aCacher fire visibilite" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR VISIBILITÉ, à grouper avec un élément dont on veut surveiller le changement de visibilité.</div>
+<script></script>
+
+<div class="aCacher fire hover" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR SURVOL, à grouper avec un élément Genially.</div>
+<script></script>
+
+
+<!-- Les éléments AUTO : déclencheurs - feedBacks -->
+<div class="aCacher fire autoFB fb" style="background-color:darkseagreen; color:white;">AUTODÉCLENCHEUR VISIBILITÉ CLIC, à grouper avec un élément dont le feedback doit être déclenché au changement de visibilité ou au clic.</div>
+<script></script>
+
+<div class="aCacher fire autoFB fb erreur" style="background-color:darkseagreen; color:white; border:solid orangered">AUTODÉCLENCHEUR ERREUR VISIBILITÉ CLIC, à grouper avec un élément dont le feedback doit être déclenché au changement de visibilité ou  au clic, mais non compté pour le fb global.</div>
+<script></script>
+
+
+
+<!-- Compteur de feedback trouvés et nombre de feedbacks total à trouver-->
+<div class="aCacher compteur" style="border: solid green;">COMPTEUR. À grouper avec une zone de texte</div>
+<script></script>
+
+<div class="aCacher total" style="border: solid red;">TOTAL. À grouper avec une zone de texte</div>
+<script></script>
+
+<!-- Compteur de feedbacks-erreur qui ont été activés -->
+<div class="aCacher compteurErreur" style="border: solid darkred;">COMPTEUR-ERREUR. À grouper avec une zone de texte</div>
+<script></script>
+
+<!-- Les éléments de délais à grouper avec une Zone de Texte contenant le délai en s : le même pour tous les feedbacks, incrémenté, décrémenté, aléatoire et combinaisons-->
+<div class="aCacher delai delay" style="border: solid blue;">Élément délai. À grouper avec une zone de texte (nombre de secondes)</div>
+<script></script>
+
+<div class="aCacher delaiInc delay" style="border: solid violet;">Élément délai Incrémenté. À grouper avec une zone de texte (nombre de secondes)</div>
+<script></script>
+
+<div class="aCacher delaiDec delay" style="border: solid blueviolet;">Élément délai décrémenté. À grouper avec une zone de texte (nombre de secondes)</div>
+<script></script>
+
+<div class="aCacher delaiAlea delay" style="border: solid orange;">Élément délai aléatoire. À grouper avec une zone de texte (nombre de secondes)</div>
+<script></script>
+
+<div class="aCacher delaiAleaInc delay" style="border: solid lightcoral;">Élément délai aléatoire incrémenté. À grouper avec une zone de texte (nombre de secondes)</div>
+<script></script>
+
+<div class="aCacher delaiAleaDec delay" style="border: solid chocolate;">Élément délai aléatoire décrémenté. À grouper avec une zone de texte (nombre de secondes)</div>
+<script></script>
+
+<div class="aCacher invisible" style="border: solid #0e0c02;">Élément invisible : Rend invisibles les éléments feedBacks</div>
+<script></script>
+
+<div class="aCacher invisibleCertains" style="border: solid #0e0c02;">Élément invisible-certains : Rend invisibles certains éléments feedBacks. À grouper avec une zone de texte (index des FeedBacks à rendre invisibles, séparés par une virgule)</div>
+<script></script>
+
+<!-- Pour taguer un élément avec lequel il est groupé et le retrouver dans la page-->
+<div class="aCacher fake" style="border: solid crimson">Fake</div>
+<script></script>
+
+
+
+<div class="aCacher" id="fb" style="border: blueviolet dashed;">Élément contenant la fonction de déclenchement des feedBacks Genially V0.48 | 06-08-23</div>
+<script>
+
+  var tousLesFB = document.querySelectorAll('.fb');
+  /* Fonction qui utilise une promesse pour être sûr qu'un élément est chargé dans la page*/
+  function waitForElement(selector) {
+    return new Promise(function(resolve, reject) {
+      var element = document.querySelector(selector);
+
+      if (element) {
+        resolve(element); // Résout la promesse avec l'élément
+      } else {
+        var observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            var nodes = Array.from(mutation.addedNodes);
+            for (var node of nodes) {
+              if (node.matches && node.matches(selector)) {
+                observer.disconnect();
+                resolve(node); // Résout la promesse avec l'élément
+                return;
+              }
+            }
+          });
+        });
+
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+
+        // Rejette la promesse après un délai de timeout (par exemple, 4 secondes)
+        setTimeout(function() {
+          observer.disconnect();
+          reject(new Error('Timeout: Élément non trouvé après 4s'));
+        }, 4000);
+      }
+    });
+  }
+
+  /* Fonction qui ne permet qu'une seule exécution d'une autre fonction*/
+  function once(fn, context) {
+    var result;
+    return function() {
+      if(fn) {
+        result = fn.apply(context || this, arguments);
+        fn = null;
+      }
+      return result;
+    };
+  }
+
+  /* Fonction qui déclenche le feedBack d'un élément et gère le feedback global, le compteur, le compteur d'erreurs si présents*/
+  /*TODO:  boucle infinie sur déclencheur + fb ??? fixé pour autoVisibilité, autoFB et autoFB-erreur*/
+  const declencheFb = (groupe) => {
+    //console.log('déclenchement de ' + groupe.querySelector('.fb').classList);
+    //groupe.style.pointerEvents = 'auto';
+    groupe.click();
+    //groupe.style.pointerEvents = 'none';
+
+    //console.log('déclenchement de ' + groupe.className);
+    if(document.querySelector('.fg_global')){
+      //console.log('fg_global');
+      document.querySelector('.fg_global').dispatchEvent(feedBackGlobal);
+    }
+    if(document.querySelector('.compteur')){
+      //console.log('compteur');
+      document.querySelector('.compteur').dispatchEvent(feedBackGlobal);
+    }
+    if(document.querySelector('.compteurErreur')){
+      //console.log('compteurErreur');
+      document.querySelector('.compteurErreur').dispatchEvent(feedBackErreur);
+    }
+  };
+  if(document.querySelector('.container-wrapper-genially')) {
+
+    /*Fonction qui donne la même couleur aux éléments déclencheurs et éléments de feedback et les incrémente suivant l'ordre de groupage dans la page*/
+    const marqueElements = (classe) => {
+    let elts = document.querySelectorAll(classe);
+    const aleatoire = () => {
+      return Math.floor(Math.random() * 256);
+    }
+    let i= 0;
+    if(classe === '.fb' &&  elts.length > 0){
+      //console.log('fb dans marqueElements');
+      for(let elt of elts){
+        if(!elt.classList.contains('autoFB')){
+          elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+          let classes = elt.classList;
+          classes.add('fb'+i);
+          elt.innerHTML = 'fb-'+i;
+          i++;
+        }
+      }
+    }
+    if(classe === '.fire' &&  elts.length > 0){
+      //console.log('fire dans marqueElements');
+      for(let elt of elts){
+
+        if(document.querySelector('.fb.fb'+i) && !elt.classList.contains('autoFB')){
+          elt.style.backgroundColor = document.querySelector('.fb.fb'+i).style.backgroundColor;
+        }
+        else if(elt.classList.contains('autoFB')){
+          elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+        }
+        else{
+          console.log('Il manque un élément feedBack de même indice pour attribuer la couleur correspondante à ' + elt.innerHTML);
+          elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+        }
+        //elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
+        let classes = elt.classList;
+        classes.add('fb'+i);
+        if(classes.contains('auto')){
+          elt.innerHTML = 'fire-auto-time'+i;
+        }
+        else if (classes.contains('autoFB')) {
+          elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+          if(classes.contains('erreur')){
+            elt.innerHTML = 'fire-autoFB-erreur-'+i;
+          }
+          else{
+            elt.innerHTML = 'fire-autoFB-'+i;
+          }
+          //elt.innerHTML = 'autoFB-' + i;
+        }
+        else if(classes.contains('visibilite')){
+          elt.innerHTML = 'fire-visibilite-'+i;
+        }
+        else if(classes.contains('hover')){
+          elt.innerHTML = 'fire-hover-'+i;
+        }
+        else{
+          elt.innerHTML = 'fire-clic-'+i;
+        }
+        //elt.innerHTML = 'fire'+i;
+        i++;
+      }
+    }
+  }
+    if(document.querySelectorAll('.fb').length > 0){
+      marqueElements('.fb');
+    }
+    if(document.querySelectorAll('.fire').length > 0){
+      marqueElements('.fire');
+    }
+  }else{
+    console.log('Pas de container-wrapper-genially');
+  }
+
+  /*Définitions des évènements feedBackGlobal, feedBackGenially, feedBackErreur personnalisés*/
+  let feedBackGlobal = new CustomEvent('feedBackGlobal', {detail: {message: 'feedBackGlobal',
+      tous: tousLesFB.length, trouve :document.querySelectorAll('.fb.active').length}, bubbles: true, cancelable: true});
+
+  let feedBackGenially = new CustomEvent('feedBackGenially', {detail: {message: 'feedBackGenially',
+      trouve: tousLesFB.length}, bubbles: true, cancelable: true});
+
+  let feedBackErreur = new CustomEvent('feedBackErreur', {detail: {message: 'feedBackErreur'}, bubbles: true, cancelable: true});
+
+  /*Fonction qui déclenche les feedBacks Genially une fois que ceux-ci sont chargés dans la page, délai par défaut avant déclenchement*/
+  const  attendDeclencheFB= (cla, delai=400) => {
+    //const unseulFb = once(declencheFb);
+    if(document.querySelector('.container-wrapper-genially')) {
+
+      if (document.querySelector('.fb' + cla)) {
+        let element = document.querySelector('.fb' + cla);
+
+      //waitForElement('.fb'+cla).then(function(element) {
+      //console.log('L\'élément est chargé :', element);
+      let classes = element.classList;
+      if (!classes.contains('erreur')) {
+        setTimeout(() => {
+          classes.add('active');
+          if (element) {
+            //console.log('Déclenchement', element);
+            declencheFb(element.closest('.genially-view-group'));
+          }
+        }, delai);
+      } else {
+        //else if(classes.contains('erreur')){
+        //console.log('Elément contient la classe "erreur', element);
+        setTimeout(() => {
+          classes.add('err');
+          if (element) {
+            //console.log('Erreur déclenchée', element);
+            declencheFb(element.closest('.genially-view-group'));
+          }
+        }, delai);
+      }
+      /*})
+        .catch(function(error) {
+          console.error('Erreur :', error);
+        });*/
+      }//
+    }
+  };
+
+  /*Marquer et incrémenter les elements de feedbacks et déclencheurs*/
+  if(!document.querySelector('.container-wrapper-genially')){
+    /*Fonction qui donne la même couleur aux éléments déclencheurs et éléments de feedback et les incrémente suivant l'ordre de groupage dans la page*/
+    const marqueElements = (classe) => {
+      let elts = document.querySelectorAll(classe);
+      const aleatoire = () => {
+        return Math.floor(Math.random() * 256);
+      }
+      let i= 0;
+      if(classe === '.fb' &&  elts.length > 0){
+        //console.log('fb dans marqueElements');
+        for(let elt of elts){
+          if(!elt.classList.contains('autoFB')){
+            elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+            let classes = elt.classList;
+            classes.add('fb'+i);
+            elt.innerHTML = 'fb-'+i;
+            i++;
+          }
+        }
+      }
+      if(classe === '.fire' &&  elts.length > 0){
+        //console.log('fire dans marqueElements');
+        for(let elt of elts){
+
+          if(document.querySelector('.fb.fb'+i) && !elt.classList.contains('autoFB')){
+            elt.style.backgroundColor = document.querySelector('.fb.fb'+i).style.backgroundColor;
+          }
+          else if(elt.classList.contains('autoFB')){
+            elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+          }
+          else{
+            console.log('Il manque un élément feedBack de même indice pour attribuer la couleur correspondante à ' + elt.innerHTML);
+            elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+          }
+          //elt.style.backgroundColor = document.querySelector('.fb'+i).style.backgroundColor;
+          let classes = elt.classList;
+          classes.add('fb'+i);
+          if(classes.contains('auto')){
+            elt.innerHTML = 'fire-auto-time'+i;
+          }
+          else if (classes.contains('autoFB')) {
+            elt.style.backgroundColor = 'rgb(' + aleatoire() + ',' + aleatoire() + ',' + aleatoire() + ')';
+            if(classes.contains('erreur')){
+              elt.innerHTML = 'fire-autoFB-erreur-'+i;
+            }
+            else{
+              elt.innerHTML = 'fire-autoFB-'+i;
+            }
+            //elt.innerHTML = 'autoFB-' + i;
+          }
+          else if(classes.contains('visibilite')){
+            elt.innerHTML = 'fire-visibilite-'+i;
+          }
+          else if(classes.contains('hover')){
+            elt.innerHTML = 'fire-hover-'+i;
+          }
+          else{
+            elt.innerHTML = 'fire-clic-'+i;
+          }
+          //elt.innerHTML = 'fire'+i;
+          i++;
+        }
+      }
+    }
+
+    if(document.querySelectorAll('.fb').length > 0){
+      marqueElements('.fb');
+    }
+    if(document.querySelectorAll('.fire').length > 0){
+      marqueElements('.fire');
+    }
+  }
+  else{
+    console.log('Mode view ou preview');
+  }
+
+  /*if(document.querySelectorAll('.fb').length > 0){
+    marqueElements('.fb');
+  }
+  if(document.querySelectorAll('.fire').length > 0){
+    marqueElements('.fire');
+  }*/
+
+
+  /*Gérer le feedback global et le compteur associé s'ils existent en mode view et preview*/
+  if(document.querySelector('.compteur')){
+    let compteur = document.querySelector('.compteur');
+    if(document.querySelector('.container-wrapper-genially') && compteur){
+      var compteurZt = compteur.closest('.genially-view-group').querySelector('.genially-view-text');
+    }
+    // Initialisation du compteur
+    if(document.querySelector('.container-wrapper-genially') && compteurZt){
+      compteurZt.textContent = '0';
+    }
+    // Gestion du compteur
+    compteur.addEventListener('feedBackGlobal', () => {
+      if(document.querySelector('.container-wrapper-genially') && compteurZt){
+        compteurZt.textContent = document.querySelectorAll('.fb.active').length.toString();
+      }
+    });
+  }
+
+  /*Gérer le feedback erreur et le compteur erreur associé s'ils existent en mode view et preview*/
+  if(document.querySelector('.compteurErreur')){
+    let compteur = document.querySelector('.compteurErreur');
+    if(document.querySelector('.container-wrapper-genially') && compteur){
+      var compteurZtE = compteur.closest('.genially-view-group').querySelector('.genially-view-text');
+    }
+    // Initialisation du compteur Erreur
+    if(document.querySelector('.container-wrapper-genially') && compteurZtE){
+      compteurZtE.textContent = '0';
+    }
+    // Gestion du compteur
+    compteur.addEventListener('feedBackErreur', () => {
+      if(document.querySelector('.container-wrapper-genially') && compteurZtE){
+        compteurZtE.textContent = document.querySelectorAll('.fb.err').length.toString();
+      }
+    });
+  }
+
+  /*Gérer le total s'il existe*/
+  if(document.querySelector('.total')){
+    const total = document.querySelector('.total');
+    if(document.querySelector('.container-wrapper-genially') && total){
+      var totalZtt = total.closest('.genially-view-group').querySelector('.genially-view-text');
+    }
+    //Afficher le total de bonnes réponses sans les erreurs si elles existent
+    if(document.querySelector('.container-wrapper-genially') && totalZtt){
+      if(document.querySelector('.fb.erreur')){
+        totalZtt.textContent = (tousLesFB.length - document.querySelectorAll('.fb.erreur').length).toString();
+      }
+      else{
+        totalZtt.textContent = tousLesFB.length.toString();
+      }
+    }
+  }
+
+  /*Gérer le feedback global s'il existe*/
+  if(document.querySelector('.fg_global')){
+    let global = document.querySelector('.fg_global');
+
+    const unSeulClic = once(function() {
+      global.click();
+    });
+
+    global.addEventListener('feedBackGlobal', (event) => {
+      //console.log(event.detail.message);
+      if(document.querySelector('.fb.erreur')){
+        if(event.detail.tous-document.querySelectorAll('.fb.erreur').length === document.querySelectorAll('.fb.active').length){
+          //global.click();
+          unSeulClic()
+        }
+      }
+      else{
+        if(event.detail.tous === document.querySelectorAll('.fb.active').length){
+          //global.click();
+          unSeulClic()
+        }
+      }
+    });
+  }
+
+  /* Abonnement de tous les éléments feedback à l'événement feedBackGenially et gestions des éléments de délai.*/
+  for(let i=0; i<tousLesFB.length; i++){
+    if(document.querySelector('.fb.fb'+i)){
+        let onceOrNot= document.querySelector('.fb.fb'+i).classList.contains('autoFB');
+        console.log(onceOrNot);
+        document.querySelector('.fb.fb'+i).addEventListener('feedBackGenially', (e) => {
+            console.log(e.target.classList);
+            if(document.querySelector('.delay')){
+            var delai = +document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').textContent;
+            }
+            if(document.querySelector('.delai')){
+            attendDeclencheFB('.fb'+i, delai*1000)
+            }
+            else if(document.querySelector('.delaiInc')){
+            attendDeclencheFB('.fb'+i, delai*i*1000)
+            }
+            else if(document.querySelector('.delaiDec')){
+            attendDeclencheFB('.fb'+i, delai*(tousLesFB.length-i)*1000)
+            }
+            else{
+            attendDeclencheFB('.fb'+i)
+            }
+        }, {once: onceOrNot});
+    }
+    /*let onceOrNot= document.querySelector('.fb.fb'+i).classList.contains('autoFB');
+    console.log(onceOrNot);
+    document.querySelector('.fb.fb'+i).addEventListener('feedBackGenially', (e) => {
+      console.log(e.target.classList);
+      if(document.querySelector('.delay')){
+        var delai = +document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').textContent;
+      }
+      if(document.querySelector('.delai')){
+        attendDeclencheFB('.fb'+i, delai*1000)
+      }
+      else if(document.querySelector('.delaiInc')){
+        attendDeclencheFB('.fb'+i, delai*i*1000)
+      }
+      else if(document.querySelector('.delaiDec')){
+        attendDeclencheFB('.fb'+i, delai*(tousLesFB.length-i)*1000)
+      }
+      else if(document.querySelector('.delaiAlea')){
+        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length)*1000)
+      }
+      else if(document.querySelector('.delaiAleaInc')){
+        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length)*i*1000)
+      }
+      else if(document.querySelector('.delaiAleaDec')){
+        attendDeclencheFB('.fb'+i, delai*Math.floor(Math.random() * tousLesFB.length)*(tousLesFB.length-i)*1000)
+      }
+      else{
+        attendDeclencheFB('.fb'+i);
+      }
+    }, {once:onceOrNot});*/
+
+    /*Déclencheurs auto : s'ils existent, les écouter et envoyer l'événement feedbackGenially sur les éléments feedbacks associés*/
+    if(document.querySelector('.auto.fb'+i)){
+      let groupe =document.querySelector('.auto.fb'+i).closest('.genially-view-group');
+      if (groupe){
+        let zoneTexte = groupe.querySelector('.genially-view-text');
+        if(zoneTexte){
+          zoneTexte.style.display = 'none';
+          let delaiSecondes = +zoneTexte.textContent*1000;
+          setTimeout(function(){
+            document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
+          }, delaiSecondes);
+        }
+      }
+    }
+
+    /*Déclencheurs de visibilité : détecter le changement de visibilité avec MutationObserver sur l'élément parent
+     de classe genially-animated-wrapper. Si l'attribut visibility ou display change envoyer l'événement feedbackGenially sur les éléments associés*/
+    else if(document.querySelector('.visibilite.fb'+i)){
+      let groupe =document.querySelector('.visibilite.fb'+i).closest('.genially-view-group');
+      if (groupe){
+        //console.log('groupe trouvé');
+        let parent = groupe.closest('.genially-animated-wrapper');
+        if(parent){
+          //console.log('parent trouvé');
+          let ancienVisible = parent.style.visibility;
+          let ancienDisplay = parent.style.display;
+          let observer = new MutationObserver(function(mutations) {
+            //console.log(mutations);
+            mutations.forEach(function(mutationRecord) {
+              if(mutationRecord.attributeName === 'style' && (ancienVisible !== parent.style.visibility || ancienDisplay !== parent.style.display)){
+                //console.log('visibility ou display ont changés');
+                document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
+              }
+            });
+          });
+          observer.observe(parent, { attributes : true, attributeFilter : ['style'] });
+        }
+      }
+    }
+
+    /*AutoDéclencheurs de visibilité : détecter le changement de visibilité avec MutationObserver sur l'élément parent
+  de classe genially-animated-wrapper. Si l'attribut visibility ou display change envoyer l'événement feedbackGenially sur les éléments associés*/
+    else if (document.querySelector('.autoFB.fb' + i)) {
+
+      const unSeulDispatch = once(function () {
+        //document.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+        let groupe = document.querySelector('.autoFB.fb' + i).closest('.genially-view-group')
+        groupe.dispatchEvent(feedBackGenially);
+      });
+
+      let groupe = document.querySelector('.autoFB.fb' + i).closest('.genially-view-group');
+      if (groupe) {
+        //console.log('groupe trouvé');
+        let parent = groupe.closest('.genially-animated-wrapper');
+        if (parent) {
+          //console.log('parent trouvé');
+          let ancienVisible = parent.style.visibility;
+          let ancienDisplay = parent.style.display;
+          let observer = new MutationObserver(function (mutations) {
+            //console.log(mutations);
+            mutations.forEach(function (mutationRecord) {
+              if (mutationRecord.attributeName === 'style' && (ancienVisible !== parent.style.visibility || ancienDisplay !== parent.style.display)) {
+                groupe.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+              }
+            });
+          });
+          observer.observe(parent, {attributes: true, attributeFilter: ['style']});
+        }
+        groupe.addEventListener('click', () => {
+          groupe.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+        });
+      }
+    }
+    /* Déclencheurs au survol des éléments fire contenant la classe hover : les écouter et envoyer l'événement feedbackGenially au survol des éléments feedbacks associés*/
+    else if(document.querySelector('.hover.fb'+i)){
+      let groupe =document.querySelector('.hover.fb'+i).closest('.genially-view-group');
+      if (groupe){
+        groupe.addEventListener('mouseover', () => {
+          document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
+        });
+        groupe.addEventListener('mouseout', () => {
+          !document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
+        });
+      }
+    }
+
+    /*Déclencheurs de clic : s'ils existent, les écouter et envoyer l'événement feedbackGenially au click sur les éléments feedbacks associés*/
+    else if(document.querySelector('.fire.fb'+i)){
+      let groupe =document.querySelector('.fire.fb'+i).closest('.genially-view-group');
+      if (groupe){
+        groupe.addEventListener('click', () => {
+          document.querySelector('.fb.fb'+i).dispatchEvent(feedBackGenially);
+        });
+      }
+    }
+
+  } // fin abonnements
+
+
+  /*Fonction desactiveClicDirect(elt) : ajoute le style pointer-events :none s'il n'existe pas*/
+  const desactiveClicDirect = elt => {
+    //console.log('desactiveClicDirect', elt);
+    if(!elt.style.pointerEvents){
+      elt.style.pointerEvents = 'none';
+    }
+  };
+
+  /*Fonction remonteArbre(depart, arrive, callback) : remote l'arbre DOM depuis l'élément DOM depart
+    jusqu'à element arrive en applicant un callback à chaque noeud parent*/
+  const remonteArbre = (depart, arrive, callback) => {
+    let noeud = depart;
+    while(noeud && noeud !== arrive){
+      callback(noeud);
+      noeud = noeud.parentNode;
+    }
+  };
+
+
+
+  /*Masquer les elements en mode view et preview, attendre que genially ait compilé*/
+  if(document.querySelector('.container-wrapper-genially')) {
+    var tousLesFB = document.querySelectorAll('.fb');
+    if (document.querySelector('.acacher')) {
+
+
+    //waitForElement('.aCacher').then(function(){
+    let eltsAcacher = document.querySelectorAll('.aCacher');
+    for (let elt of eltsAcacher) {
+      //elt.style.display = 'none';
+      if (!elt.classList.contains('fire')) {
+        elt.closest('.genially-view-rich-content').style.display = 'none';
+      } else {
+        elt.style.display = 'none';
+      }
+      //elt.closest('.genially-view-rich-content').style.display ='none';
+      if (elt.closest(' .genially-view-cursor-pointer')) {
+        //console.log('cacher le curseur sur :', elt.closest(' .genially-view-cursor-pointer'));
+        elt.closest(' .genially-view-cursor-pointer').classList.remove('genially-view-cursor-pointer');
+      }
+    }
+    if (document.querySelector('.delay')) {
+      document.querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').style.display = 'none';
+    }
+    if (document.querySelector('.invisible')) {
+      for (let fb of tousLesFB) {
+        // À vérifier : suffisant pour cacher les éléments fb avec invisible ?
+        fb.closest('.genially-view-group').style.display = 'none';
+      }
+    }
+    if (document.querySelector('.invisibleCertains')) {
+      if (document.querySelector('.invisibleCertains').closest('.genially-view-group').querySelector('.genially-view-text')) {
+        document.querySelector('.invisibleCertains').closest('.genially-view-group').querySelector('.genially-view-text').style.display = 'none';
+        let fbACacher = document.querySelector('.invisibleCertains').closest('.genially-view-group').querySelector('.genially-view-text').textContent.trim(',').split(',');
+        for (let fbaC of fbACacher) {
+          //console.log('fbaC', document.querySelector('.fb.fb'+fbaC));
+          if (document.querySelector('.fb.fb' + fbaC)) {
+            document.querySelector('.fb.fb' + fbaC).closest('.genially-view-group').style.display = 'none';
+          }
+        }
+      }
+    }
+
+
+    /*Pour tous les éléments de classe fb qui ne contiennent qui ne contiennent pas la classe autoFB remonter l'arbre
+       en appliquant le callback desactiveClicDirect*/
+    for (let fb of tousLesFB) {
+      if (!fb.classList.contains('autoFB')) {
+        remonteArbre(fb, fb.closest('.genially-animated-wrapper'), desactiveClicDirect);
+      }
+    }
+    if (document.querySelector('.fg_global')) {
+      let fgGlobal = document.querySelector('.fg_global');
+      remonteArbre(fgGlobal, fgGlobal.closest('.genially-animated-wrapper'), desactiveClicDirect);
+    }
+
+  }
+    //});// fin de then
+
+    /*ancienne version cacher : v.044 du01/08*/
+
+
+  } // fin masquer les elements en mode view et preview
+
+</script>
+
+</body>
+</html>
