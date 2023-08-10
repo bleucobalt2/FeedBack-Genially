@@ -65,31 +65,33 @@
     }
   }
 
+  /* En mode vue ou preview*/
   if (document.querySelector('.container-wrapper-genially')) {
+
     var tousLesFB = document.querySelector('.genially-view-slide-container').querySelectorAll('.fb');
 
-    var idSlideFonction = document.querySelector('.genially-view-slide').id;
-    console.log('slide de la fonction: ', idSlideFonction);
+    var idSlideFn = document.querySelector('.genially-view-slide').id;
+    console.log('slide de la fonction: ', idSlideFn);
     if(!sessionStorage.getItem('idSlide')){
-      sessionStorage.setItem('idSlide', idSlideFonction);
+      sessionStorage.setItem('idSlide', idSlideFn);
     }
     else{
       //sessionStorage.removeItem('idSlide');
-      sessionStorage.setItem('idnouveauSlide', idSlideFonction);
+      sessionStorage.setItem('idnouveauSlide', idSlideFn);
       //sessionStorage.setItem('idSlide', element.id);
     }
     if(sessionStorage.getItem('idSlide') !== sessionStorage.getItem('idnouveauSlide')) {
       console.log('changement de page, ancien id :', sessionStorage.getItem('idSlide'), 'nouveau id :', sessionStorage.getItem('idnouveauSlide'));
-      setTimeout(function () {
-        console.log('stockage du nouveau id :', idSlideFonction);
-        sessionStorage.setItem('idSlide', idSlideFonction);
-      }, 3000);
+      //setTimeout(function () {
+        console.log('stockage du nouveau id :', idSlideFn);
+        sessionStorage.setItem('idSlide', idSlideFn);
+      //}, 3000);
       // executer le reste du code
     }
 
 
     /* Fonction qui utilise une promesse pour être sûr qu'un élément est chargé dans la page*/
-    function waitForElement(selector) {
+    /*function waitForElement(selector) {
       return new Promise(function (resolve, reject) {
         var element = document.querySelector('.genially-view-slide-container').querySelector(selector);
 
@@ -121,7 +123,7 @@
           }, 4000);
         }
       });
-    }
+    }*/
 
     /* Fonction qui ne permet qu'une seule exécution d'une autre fonction*/
     function once(fn, context) {
@@ -173,12 +175,15 @@
       detail: {
         message: 'feedBackGenially',
         trouve: tousLesFB.length,
-        slide: document.querySelector('.container-wrapper-genially .genially-view-slide').id,
+        slide: document.querySelector('.container-wrapper-genially .genially-view-slide').id
       }, bubbles: true, cancelable: true
     });
 
     let feedBackErreur = new CustomEvent('feedBackErreur', {
-      detail: {message: 'feedBackErreur'},
+      detail: {
+        message: 'feedBackErreur',
+        slide: document.querySelector('.container-wrapper-genially .genially-view-slide').id
+      },
       bubbles: true,
       cancelable: true
     });
@@ -307,12 +312,33 @@
         console.log('Appel et Slide identique ? : ', e.detail.slide === sessionStorage.getItem('idSlide'));
         if(e.detail.slide === sessionStorage.getItem('idSlide')){
           console.log('Slide Appel et Slide Fonction identique');
+          if(e.target.classList.contains('autoFB')){onceOrNot = true;}
+
+          if (document.querySelector('.genially-view-slide-container').querySelector('.delay')) {
+            var delai = +document.querySelector('.genially-view-slide-container').querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').textContent;
+          }
+          if (document.querySelector('.genially-view-slide-container').querySelector('.delai')) {
+            attendDeclencheFB('.fb' + i, delai * 1000)
+          } else if (document.querySelector('.genially-view-slide-container').querySelector('.delaiInc')) {
+            attendDeclencheFB('.fb' + i, delai * i * 1000)
+          } else if (document.querySelector('.genially-view-slide-container').querySelector('.delaiDec')) {
+            attendDeclencheFB('.fb' + i, delai * (tousLesFB.length - i) * 1000)
+          } else if (document.querySelector('.genially-view-slide-container').querySelector('.delaiAlea')) {
+            attendDeclencheFB('.fb' + i, delai * Math.floor(Math.random() * tousLesFB.length) * 1000)
+          } else if (document.querySelector('.genially-view-slide-container').querySelector('.delaiAleaInc')) {
+            attendDeclencheFB('.fb' + i, delai * Math.floor(Math.random() * tousLesFB.length) * i * 1000)
+          } else if (document.querySelector('.genially-view-slide-container').querySelector('.delaiAleaDec')) {
+            attendDeclencheFB('.fb' + i, delai * Math.floor(Math.random() * tousLesFB.length) * (tousLesFB.length - i) * 1000)
+          } else {
+            attendDeclencheFB('.fb' + i);
+          }
+
         }
         else {
           console.log('Slide Appel et Slide Fonction différent');
         }
 
-        if(e.target.classList.contains('autoFB')){onceOrNot = true;}
+        /*if(e.target.classList.contains('autoFB')){onceOrNot = true;}
 
         if (document.querySelector('.genially-view-slide-container').querySelector('.delay')) {
           var delai = +document.querySelector('.genially-view-slide-container').querySelector('.delay').closest('.genially-view-group').querySelector('.genially-view-text').textContent;
@@ -331,7 +357,7 @@
           attendDeclencheFB('.fb' + i, delai * Math.floor(Math.random() * tousLesFB.length) * (tousLesFB.length - i) * 1000)
         } else {
           attendDeclencheFB('.fb' + i);
-        }
+        }*/
       }, {once: onceOrNot});
 
       /*Déclencheurs auto : s'ils existent, les écouter et envoyer l'événement feedbackGenially sur les éléments feedbacks associés*/
@@ -381,11 +407,11 @@
     de classe genially-animated-wrapper. Si l'attribut visibility ou display change envoyer l'événement feedbackGenially sur les éléments associés*/
       else if (document.querySelector('.genially-view-slide-container').querySelector('.autoFB.fb' + i)) {
 
-        const unSeulDispatch = once(function () {
+        /*const unSeulDispatch = once(function () {
           //document.querySelector('.genially-view-slide-container').querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
           let groupe = document.querySelector('.genially-view-slide-container').querySelector('.autoFB.fb' + i).closest('.genially-view-group')
           groupe.dispatchEvent(feedBackGenially);
-        });
+        });*/
 
         let groupe = document.querySelector('.genially-view-slide-container').querySelector('.autoFB.fb' + i).closest('.genially-view-group');
         if (groupe) {
@@ -499,7 +525,7 @@
 
     } // fin masquer les elements en mode view et preview
   }
-  // fin if (document.querySelector('.container-wrapper-genially')) : fin de mode view ou preview
+  // fin de mode view ou preview
   //console.log('Mode edition');
   else {
     tousLesFB = document.querySelectorAll('.fb');
