@@ -34,6 +34,9 @@
 <div class="aCacher fire hover" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR SURVOL, à grouper avec un élément Genially.</div>
 <script></script>
 
+<div class="aCacher fire move" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR DÉPLACEMENT, à grouper avec un élément Genially.</div>
+<script></script>
+
 
 <!-- Les éléments AUTO : déclencheurs - feedBacks -->
 <div class="aCacher fire autoFB fb" style="background-color:darkseagreen; color:white;">AUTODÉCLENCHEUR VISIBILITÉ CLIC, à grouper avec un élément dont le feedback doit être déclenché au changement de visibilité ou au clic.</div>
@@ -89,10 +92,11 @@
 
 <!-- L'élément contenant la fonction feedbacks -->
 <div class="aCacher" id="fb" style="background-color:grey;color:white;width:100%; height:100%;overflow:hidden;">FONCTION
-    FEEDBACKS - V1.1 10/08/23 <br> OBLIGATOIRE
+    FEEDBACKS - V1.31 16/08/23 <br> OBLIGATOIRE
 </div>
 <script>
-  /*Fonction qui donne la même couleur aux éléments déclencheurs et éléments de feedback et les incrémente suivant l'ordre de groupage dans la page*/
+  /*Fonction qui donne la même couleur aux éléments déclencheurs et éléments de feedback
+   et les incrémente suivant l'ordre de groupage dans la page, commun au mode edition et view/preview*/
   const marqueElements = (classe) => {
     let elts;
     if(document.querySelector('.container-wrapper-genially')){
@@ -146,6 +150,8 @@
           elt.innerHTML = 'fire-visibilite-' + i;
         } else if (classes.contains('hover')) {
           elt.innerHTML = 'fire-hover-' + i;
+        } else if(classes.contains('move')){
+          elt.innerHTML = 'fire-move-' + i;
         } else {
           elt.innerHTML = 'fire-clic-' + i;
         }
@@ -155,15 +161,15 @@
     }
   }
 
-  /* En mode vue ou preview*/
+  /* En mode view ou preview*/
   if (document.querySelector('.container-wrapper-genially')) {
 
     var tousLesFB = document.querySelector('.genially-view-slide-container').querySelectorAll('.fb');
 
+    /*Détection du changement de page et par stockage dans sessionStorage*/
     var idSlideFn = document.querySelector('.genially-view-slide').id;
     var slideId ='[id="'+idSlideFn+'"] ';
 
-    console.log('id slide de la fonction: ', idSlideFn);
     if(!sessionStorage.getItem('idSlide')){
       sessionStorage.setItem('idSlide', idSlideFn);
     }
@@ -173,12 +179,12 @@
       //sessionStorage.setItem('idSlide', element.id);
     }
     if(sessionStorage.getItem('idSlide') !== sessionStorage.getItem('idnouveauSlide')) {
-      console.log('changement de page, ancien id :', sessionStorage.getItem('idSlide'), 'nouveau id :', sessionStorage.getItem('idnouveauSlide'));
+      console.log('changement de page, ancien id :', sessionStorage.getItem('idSlide'), 'nouveau id :', sessionStorage.getItem('idnouveauSlide'), '-> Stockage');
       //setTimeout(function () {
-      console.log('stockage du nouveau id :', idSlideFn);
+      //console.log('stockage du nouveau id :', idSlideFn);
       sessionStorage.setItem('idSlide', idSlideFn);
       //}, 3000);
-      // executer le reste du code
+      // executer le reste du code après le changement de page
     }
 
 
@@ -194,16 +200,45 @@
       };
     }
 
+    /* Fonction qui surveille les changements/suppression sur le style d'un élément, et appelle un callBack pour gérer*/
+    function surveillerChangementsStyle(element, callback) {
+      const observer = new MutationObserver((mutationsList, observer) => {
+        for (const mutation of mutationsList) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            //Si l'attribut style a été modifié, on compare les tableaux de styles avant et après la modification,
+            const stylesAvant = mutation.oldValue ? mutation.oldValue.split(';').map(style => style.trim()) : [];
+            const stylesApres = element.style.cssText.split(';').map(style => style.trim());
+
+            // pour trouver les propriétés ajoutées/modifiées et supprimées
+            const proprietesAjouteesModifiees = stylesApres.filter(style => !stylesAvant.includes(style));
+            const proprietesSupprimees = stylesAvant.filter(style => !stylesApres.includes(style));
+
+            //et on appelle le callback avec les propriétés ajoutées/modifiées et supprimées pour gérer
+            if (proprietesAjouteesModifiees.length > 0 || proprietesSupprimees.length > 0) {
+              callback(element, proprietesAjouteesModifiees, proprietesSupprimees);
+            }
+          }
+        }
+      });
+
+      const options = {
+        attributes: true,
+        attributeFilter: ['style'],
+        attributeOldValue: true,
+      };
+
+      observer.observe(element, options);
+    }
+
     /* Fonction qui déclenche le feedBack d'un élément et gère le feedback global, le compteur, le compteur d'erreurs si présents*/
-    /*TODO:  boucle infinie sur déclencheur + fb ??? fixé pour autoVisibilité, autoFB et autoFB-erreur*/
+    /*TODO:  boucle infinie sur .fire.fb.fbi.autoFB / autoFB-erreur .fire.visibilite.fbi: fixée par changement de fonction MutationObserver 15-08-23*/
     const declencheFb = (groupe) => {
-      console.log('déclenchement de ' + groupe.querySelector('.fb').classList);
+      console.log('déclenchement du FB sur le groupe de: ' + groupe.querySelector('.fb').classList);
 
       //groupe.style.pointerEvents = 'auto';
       groupe.click();
       //groupe.style.pointerEvents = 'none';
 
-      //console.log('déclenchement de ' + groupe.className);
       if (document.querySelector(slideId+'.fg_global')) {
         //console.log('fg_global');
         document.querySelector(slideId+'.fg_global').dispatchEvent(feedBackGlobal);
@@ -245,7 +280,8 @@
       cancelable: true
     });
 
-    /*Fonction qui déclenche les feedBacks Genially une fois que ceux-ci sont chargés dans la page, délai par défaut avant déclenchement*/
+    /*Fonction qui déclenche les feedBacks Genially, délai par défaut (400ms), ou délai programmé par les éléments
+    *  Et ajoute les classes 'active' ou 'err' suivant le type d'élément*/
     const attendDeclencheFB = (cla, delai = 400) => {
       if (document.querySelector('.fb' + cla)) {
         let element = document.querySelector('.fb' + cla);
@@ -274,7 +310,7 @@
     };
 
 
-    /*Marquer et incrémenter les elements de feedbacks et déclencheurs*/
+    /*Marquer et incrémenter les elements de feedbacks et déclencheurs en mode preview || view*/
     if (document.querySelector(slideId).querySelectorAll('.fb').length > 0) {
       marqueElements('.fb');
     }
@@ -344,35 +380,31 @@
       });
 
       global.addEventListener('feedBackGlobal', (event) => {
+
         //console.log(event.detail.message);
         if (document.querySelector(slideId+'.fb.erreur')) {
           if (event.detail.tous - document.querySelectorAll(slideId+'.fb.erreur').length === document.querySelectorAll(slideId+'.fb.active').length) {
-            //global.click();
+            //console.log('Tous les éléments sont activés', event.detail.tous - document.querySelectorAll(slideId+'.fb.erreur').length, document.querySelector(slideId).querySelectorAll('.fb.active').length);
             unSeulClic()
           }
         } else {
           if (event.detail.tous === document.querySelector(slideId).querySelectorAll('.fb.active').length) {
-            //global.click();
+            //console.log('Tous les éléments sont activés', event.detail.tous, document.querySelector(slideId).querySelectorAll('.fb.active').length);
             unSeulClic()
           }
         }
       });
     }
 
-    /* Abonnement de tous les éléments feedback à l'événement feedBackGenially et gestions des éléments de délai.*/
+    /* Abonnement de tous les éléments feedback .fb.fbi à l'événement feedBackGenially et gestions des éléments de délai.*/
     for (let i = 0; i < tousLesFB.length; i++) {
-
+      //On laisse au cas où, pour l'instant...
       let onceOrNot = false;
 
       document.querySelector('.genially-view-slide-container').querySelector('.fb.fb' + i).addEventListener('feedBackGenially', (e) => {
-
-        console.log('abonnement avant déclenchement sur: ', e.target.classList);
-        console.log('Appellé depuis le slide : ', e.detail.slide);
-
+        // Si l'id du slide stocké est le même que celui de l'événement: FB autorisé
         if(e.detail.slide === sessionStorage.getItem('idSlide')){
-          console.log('Slide Appel et Slide Fonction identique ; FB autorisé');
-          // Un seul appel pour les élément autoFB
-          if(e.target.classList.contains('autoFB')){onceOrNot = true;}
+          //console.log('Slide Appel et Slide Fonction identique ; FB autorisé');
 
           if (document.querySelector(slideId+'.delay')) {
             var delai = +document.querySelector(slideId+'.delay').closest('.genially-view-group').querySelector('.genially-view-text').textContent;
@@ -389,7 +421,12 @@
             attendDeclencheFB('.fb' + i, delai * Math.floor(Math.random() * tousLesFB.length) * i * 1000)
           } else if (document.querySelector(slideId+'.delaiAleaDec')) {
             attendDeclencheFB('.fb' + i, delai * Math.floor(Math.random() * tousLesFB.length) * (tousLesFB.length - i) * 1000)
-          } else {
+            // Debug autovisibilité 15/08, à supprimer si tout va bien
+          } else if(e.target.classList.contains('autoFB')) {
+            console.log('autovisibilité détectée');
+            //onceOrNot = true;
+            attendDeclencheFB('.fb' + i);
+          }else {
             attendDeclencheFB('.fb' + i);
           }
 
@@ -398,9 +435,11 @@
           console.log('Slide Appel FB et Slide Fonction différent : FB non autorisé');
         }
 
-      }, {once: onceOrNot});
+      }, {once: onceOrNot});//On laisse once à false par défaut, pour l'instant...
 
-      /*Déclencheurs auto : s'ils existent, les écouter et envoyer l'événement feedbackGenially sur les éléments feedbacks associés*/
+      /*Gestion des déclencheurs d'indice i*/
+
+      /*Déclencheurs auto-time : s'ils existent, les écouter et envoyer l'événement feedbackGenially sur les éléments feedbacks associés*/
       if (document.querySelector(slideId+'.auto.fb' + i)) {
         let groupe = document.querySelector(slideId+'.auto.fb' + i).closest('.genially-view-group');
         if (groupe) {
@@ -412,64 +451,137 @@
               if(document.querySelector(slideId+'.fb.fb' + i)){
                 document.querySelector(slideId+'.fb.fb' + i).dispatchEvent(feedBackGenially);
               }
-              //document.querySelector('.genially-view-slide-container').querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
             }, delaiSecondes);
           }
         }
       }
 
-      /*Déclencheurs de visibilité : détecter le changement de visibilité avec MutationObserver sur l'élément parent
-       de classe genially-animated-wrapper. Si l'attribut visibility ou display change envoyer l'événement feedbackGenially sur les éléments associés*/
-      else if (document.querySelector(slideId+'.visibilite.fb' + i)) {
-        let groupe = document.querySelector(slideId+'.visibilite.fb' + i).closest('.genially-view-group');
+      /*Déclencheurs de visisibilité (.fire).fb.autoFB.fbi ou .fire.visibilite.fbi*/
+      else if (document.querySelector(slideId+'.autoFB.fb' + i) || document.querySelector(slideId+'.visibilite.fb' + i)) {
+
+        let groupe = document.querySelector(slideId+'.autoFB.fb' + i) ? document.querySelector(slideId+'.autoFB.fb' + i).closest('.genially-view-group') : document.querySelector(slideId+'.visibilite.fb' + i).closest('.genially-view-group');
+
         if (groupe) {
-          //console.log('groupe trouvé');
           let parent = groupe.closest('.genially-animated-wrapper');
           if (parent) {
-            //console.log('parent trouvé');
-            let ancienVisible = parent.style.visibility;
-            let ancienDisplay = parent.style.display;
-            let observer = new MutationObserver(function (mutations) {
-              //console.log(mutations);
-              mutations.forEach(function (mutationRecord) {
-                if (mutationRecord.attributeName === 'style' && (ancienVisible !== parent.style.visibility || ancienDisplay !== parent.style.display)) {
-                  //console.log('visibility ou display ont changés');
-                  document.querySelector(slideId+'.fb.fb' + i).dispatchEvent(feedBackGenially);
-                }
-              });
+
+            surveillerChangementsStyle(parent, (element, changements,suppressions) => {
+
+              /*console.log(`Changements de style détectés pour l'élément parent de: ${element.querySelector('.fb'+i).classList.toString()}`);
+
+              // Détection des changements sur opacity à réactiver si besoin
+
+              if(changements.toString().includes('opacity') || suppression.toString().includes('opacity')){
+                console.log('La propriété "opacity" a été ajoutée modifiée ou supprimée.');
+                //gérer les cas de changement d'opacité
+              }*/
+
+              if (changements.toString().includes('visibility') || suppressions.toString().includes('visibility')) {
+                // vérification des changements de visibilité à commenter si besoin
+                console.log(`La propriété \x1B[31m"visibility" du parent de: \x1B[34m${element.querySelector('.fb'+i).classList.toString()} \x1B[31ma été ajoutée, modifiée ou supprimée.`);
+                console.log('Propriétés supprimées :', suppressions);
+                console.log('Propriétés modifiées :', changements);
+
+                // lancement l'événement feedbackGenially
+                document.querySelector('.genially-view-slide-container .fb.fb' + i).dispatchEvent(feedBackGenially);
+              }
+
+              if (changements.toString().includes('display') || suppressions.toString().includes('display')) {
+                // vérification des changements de display à commenter si besoin
+                console.log(`La propriété \x1B[31m"display" du parent de: \x1B[34m${element.querySelector('.fb'+i).classList.toString()} \x1B[31ma été ajoutée, modifiée ou supprimée.`)
+                console.log('Propriétés supprimées :', suppressions);
+                console.log('Propriétés modifiées :', changements);
+
+                // lancement de l'événement feedbackGenially
+                document.querySelector('.genially-view-slide-container .fb.fb' + i).dispatchEvent(feedBackGenially);
+              }
             });
-            observer.observe(parent, {attributes: true, attributeFilter: ['style']});
           }
         }
       }
 
-      /*AutoDéclencheurs de visibilité : détecter le changement de visibilité avec MutationObserver sur l'élément parent
-    de classe genially-animated-wrapper. Si l'attribut visibility ou display change envoyer l'événement feedbackGenially sur les éléments associés*/
-      else if (document.querySelector(slideId+'.autoFB.fb' + i)) {
+      /*Déclencheurs au mouvement .fire.move.fbi*/
+      else if(document.querySelector(slideId+'.move.fb' + i)){
+        console.log('Déclencheur au mouvement détecté');
+        let moveFbi = document.querySelector(slideId+'.move.fb' + i);
+        let groupe = moveFbi.closest('.genially-view-group');
 
-        let groupe = document.querySelector(slideId+'.autoFB.fb' + i).closest('.genially-view-group');
         if (groupe) {
-          //console.log('groupe trouvé');
-          let parent = groupe.closest('.genially-animated-wrapper');
-          if (parent) {
-            //console.log('parent trouvé');
-            let ancienVisible = parent.style.visibility;
-            let ancienDisplay = parent.style.display;
-            let observer = new MutationObserver(function (mutations) {
-              //console.log(mutations);
-              mutations.forEach(function (mutationRecord) {
-                if (mutationRecord.attributeName === 'style' && (ancienVisible !== parent.style.visibility || ancienDisplay !== parent.style.display)) {
-                  groupe.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
-                }
-              });
-            });
-            observer.observe(parent, {attributes: true, attributeFilter: ['style']});
+          /*Gestion des événements au move*/
+          let dedans = 0;
+          const gereDeplacements = () => {
+            if (dedans === 1 && moveFbi.classList.contains('active') && !moveFbi.classList.contains('estDeclenche')) {
+              console.log('Mouseup Déclencheur On est dans la zone: déclenchement du feedback');
+              document.querySelector(slideId+'.fb.fb' + i).dispatchEvent(feedBackGenially);
+              moveFbi.classList.add('estDeclenche');
+            }
+            else if(dedans === 2){
+              console.log('Mouse up Déclencheur On est sorti de la zone: on déclenche le feedback pour simuler on/off avec reveler réversible');
+              document.querySelector(slideId+'.fb.fb' + i).dispatchEvent(feedBackGenially);
+              dedans = 0;
+              moveFbi.classList.remove('estDeclenche');
+              moveFbi.classList.remove('active');
+            }
           }
-          groupe.addEventListener('click', () => {
-            groupe.querySelector('.fb.fb' + i).dispatchEvent(feedBackGenially);
+
+          document.addEventListener('mouseup',  () => {
+            gereDeplacements();
           });
-        }
-      }
+          document.addEventListener('touchmove',  () => {
+            gereDeplacements();
+          });
+
+          /* Surveillance des fb.fbi et .move.fbi pour voir s'ils se superposent*/
+          let parent = groupe.closest('.genially-animated-wrapper');
+          if (parent && document.querySelector(slideId+'.fb.fb' + i)) {
+            /* Position et dimensions du parent du FB .fb.fbi*/
+            let positionLeftFbi =+ document.querySelector(slideId+'.fb.fb' + i).closest('.genially-animated-wrapper').style.left.replace('px','');
+            let positionTopFbi =+ document.querySelector(slideId+'.fb.fb' + i).closest('.genially-animated-wrapper').style.top.replace('px','');
+            let largeurFbi =+ document.querySelector(slideId+'.fb.fb' + i).closest('.genially-animated-wrapper').style.width.replace('px','');
+            let hauteurFbi =+ document.querySelector(slideId+'.fb.fb' + i).closest('.genially-animated-wrapper').style.height.replace('px','');
+
+            /* Position initiale et dimensions du parent du déclencheur .move.fbi*/
+            let largeurParent =+ parent.style.width.replace('px','');
+            let hauteurParent =+ parent.style.height.replace('px','');
+            let positionLeftParent =+ parent.style.left.replace('px','');
+            let positionTopParent =+ parent.style.top.replace('px','');
+
+            surveillerChangementsStyle(parent, (element, changements,suppressions) => {
+              if (changements.toString().includes('left') && changements[0].includes('left')) {
+                positionLeftParent =+ changements[0].trim().replace('px','').replace('left:','');
+              }
+              if(changements.toString().includes('top') && changements[0].includes('top')){
+                positionTopParent =+ changements[0].trim().replace('px','').replace('top:','');
+
+              }
+              /* Tester si les parents de .fb.fbi et .move.fbi coîncident et se superposent*/
+              if((positionLeftParent+largeurParent >= positionLeftFbi) && (positionLeftParent+largeurParent <= positionLeftFbi+largeurFbi) && (positionTopParent+hauteurParent >= positionTopFbi) && (positionTopParent+hauteurParent <= positionTopFbi+hauteurFbi)){
+                console.warn('Les éléments parents de .fb.fb'+i+' et de .move.fb'+i+' coïncident et se superposent');
+                moveFbi.classList.add('active');
+                dedans = 1;
+
+              }
+              else{
+                //console.log('Ne se superposent pas ou quitte la zone de déclenchement');
+                if(dedans == 1){
+                  //On quitte la zone de déclenchement
+                  moveFbi.classList.remove('active');
+                  dedans = 2;
+                }
+                else{
+                  //on n'est pas dans la zone de déclenchement
+                  moveFbi.classList.remove('active');
+                }
+              }
+
+            });//fin de surveillerChangementsStyle
+          }//fin de parent (.genially-animated-wrapper)
+        }//fin de groupe
+      }//fin de .move.fbi existe
+
+
+
+
       /* Déclencheurs au survol des éléments fire contenant la classe hover : les écouter et envoyer l'événement feedbackGenially au survol des éléments feedbacks associés*/
       else if (document.querySelector(slideId+'.hover.fb' + i)) {
         let groupe = document.querySelector(slideId+'.hover.fb' + i).closest('.genially-view-group');
@@ -493,7 +605,7 @@
         }
       }
 
-    } // fin abonnements
+    } // fin abonnements sur les .fb.fbi (y compris .autoFB) et gestion des déclencheurs associés .fire.fbi(click), .hover.fbi, .fire.visibilite.fbi
 
 
     /*Fonction desactiveClicDirect(elt) : ajoute le style pointer-events :none s'il n'existe pas*/
@@ -572,10 +684,9 @@
     /*ancienne version cacher : v.044 du01/08*/
 
 
-    //} // fin masquer les elements en mode view et preview
-  }
-    // fin de mode view ou preview
-  //console.log('Mode edition');
+  }// fin de mode view ou preview
+
+  /* En mode édition*/
   else {
     tousLesFB = document.querySelectorAll('.fb');
 
@@ -588,7 +699,3 @@
     }
   }
 </script>
-
-
-</body>
-</html>
