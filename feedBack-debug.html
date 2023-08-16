@@ -34,6 +34,9 @@
 <div class="aCacher fire hover" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR SURVOL, à grouper avec un élément Genially.</div>
 <script></script>
 
+<div class="aCacher fire move" style="background-color:darkseagreen; color:white;">DÉCLENCHEUR DÉPLACEMENT, à grouper avec un élément Genially.</div>
+<script></script>
+
 
 <!-- Les éléments AUTO : déclencheurs - feedBacks -->
 <div class="aCacher fire autoFB fb" style="background-color:darkseagreen; color:white;">AUTODÉCLENCHEUR VISIBILITÉ CLIC, à grouper avec un élément dont le feedback doit être déclenché au changement de visibilité ou au clic.</div>
@@ -147,6 +150,8 @@
           elt.innerHTML = 'fire-visibilite-' + i;
         } else if (classes.contains('hover')) {
           elt.innerHTML = 'fire-hover-' + i;
+        } else if(classes.contains('move')){
+          elt.innerHTML = 'fire-move-' + i;
         } else {
           elt.innerHTML = 'fire-clic-' + i;
         }
@@ -228,7 +233,7 @@
     /* Fonction qui déclenche le feedBack d'un élément et gère le feedback global, le compteur, le compteur d'erreurs si présents*/
     /*TODO:  boucle infinie sur .fire.fb.fbi.autoFB / autoFB-erreur .fire.visibilite.fbi: fixée par changement de fonction MutationObserver 15-08-23*/
     const declencheFb = (groupe) => {
-      console.log('déclenchement du FB sur : ' + groupe.querySelector('.fb').classList);
+      console.log('déclenchement du FB sur le groupe de: ' + groupe.querySelector('.fb').classList);
 
       //groupe.style.pointerEvents = 'auto';
       groupe.click();
@@ -375,15 +380,16 @@
       });
 
       global.addEventListener('feedBackGlobal', (event) => {
+
         //console.log(event.detail.message);
         if (document.querySelector(slideId+'.fb.erreur')) {
           if (event.detail.tous - document.querySelectorAll(slideId+'.fb.erreur').length === document.querySelectorAll(slideId+'.fb.active').length) {
-            //global.click();
+            console.log('Tous les éléments sont activés', event.detail.tous - document.querySelectorAll(slideId+'.fb.erreur').length, document.querySelector(slideId).querySelectorAll('.fb.active').length);
             unSeulClic()
           }
         } else {
           if (event.detail.tous === document.querySelector(slideId).querySelectorAll('.fb.active').length) {
-            //global.click();
+            console.log('Tous les éléments sont activés', event.detail.tous, document.querySelector(slideId).querySelectorAll('.fb.active').length);
             unSeulClic()
           }
         }
@@ -490,6 +496,106 @@
           }
         }
       }
+
+      /*Déclencheurs au mouvement .fire.move.fbi*/
+      else if(document.querySelector(slideId+'.move.fb' + i)){
+        console.log('Déclencheur au mouvement détecté');
+        let moveFbi = document.querySelector(slideId+'.move.fb' + i);
+        let groupe = moveFbi.closest('.genially-view-group');
+
+        if (groupe) {
+          /*Gestion des événements au move*/
+          let dedans = 0;
+          const gereDeplacements = () => {
+            if (dedans === 1 && moveFbi.classList.contains('active') && !moveFbi.classList.contains('estDeclenche')) {
+              console.log('Mouseup Déclencheur On est dans la zone: déclenchement du feedback');
+              document.querySelector(slideId+'.fb.fb' + i).dispatchEvent(feedBackGenially);
+              moveFbi.classList.add('estDeclenche');
+            }
+            else if(dedans === 2){
+              console.log('Mouse up Déclencheur On est sorti de la zone: on déclenche le feedback pour simuler on/off avec reveler réversible');
+              document.querySelector(slideId+'.fb.fb' + i).dispatchEvent(feedBackGenially);
+              dedans = 0;
+              moveFbi.classList.remove('estDeclenche');
+              moveFbi.classList.remove('active');
+            }
+          }
+
+          document.addEventListener('mouseup',  () => {
+            gereDeplacements();
+          });
+          document.addEventListener('touchmove',  () => {
+            gereDeplacements();
+          });
+
+          /* Surveillance des fb.fbi et .move.fbi pour voir s'ils se superposent*/
+          let parent = groupe.closest('.genially-animated-wrapper');
+          if (parent && document.querySelector(slideId+'.fb.fb' + i)) {
+            /* Position et dimensions du parent du FB .fb.fbi*/
+            let positionLeftFbi =+ document.querySelector(slideId+'.fb.fb' + i).closest('.genially-animated-wrapper').style.left.replace('px','');
+            let positionTopFbi =+ document.querySelector(slideId+'.fb.fb' + i).closest('.genially-animated-wrapper').style.top.replace('px','');
+            let largeurFbi =+ document.querySelector(slideId+'.fb.fb' + i).closest('.genially-animated-wrapper').style.width.replace('px','');
+            let hauteurFbi =+ document.querySelector(slideId+'.fb.fb' + i).closest('.genially-animated-wrapper').style.height.replace('px','');
+
+            /* Position initiale et dimensions du parent du déclencheur .move.fbi*/
+            let largeurParent =+ parent.style.width.replace('px','');
+            let hauteurParent =+ parent.style.height.replace('px','');
+            let positionLeftParent =+ parent.style.left.replace('px','');
+            let positionTopParent =+ parent.style.top.replace('px','');
+
+            surveillerChangementsStyle(parent, (element, changements,suppressions) => {
+              if (changements.toString().includes('left') && changements[0].includes('left')) {
+                positionLeftParent =+ changements[0].trim().replace('px','').replace('left:','');
+                //console.log('left parent move'+i+': ', positionLeftParent);
+                /*if(document.querySelector(slideId+'.fb.fb' + i)){
+                  //console.log('top parent .fb'+i+': ',positionTopFbi);
+                  //console.log('left parent .fb'+i+': ', positionLeftFbi);
+                  //console.log('largeur parent fb'+i+': ', largeurFbi);
+                  //console.log('hauteur parent fb'+i+': ', hauteurFbi);
+                }*/
+              }
+              if(changements.toString().includes('top') && changements[0].includes('top')){
+                //console.log(`La propriété \x1B[31m"top" du parent de: \x1B[34m${element.querySelector('.move.fb'+i).classList.toString()} \x1B[31ma été  modifiée.`)
+
+                //console.log('Propriétés supprimées :', suppressions);
+                //console.log('Propriétés modifiées :', changements);
+                //console.log('changements[0] top: ', changements[0]);
+                positionTopParent =+ changements[0].trim().replace('px','').replace('top:','');
+                //console.log('top parent move'+i+': ', positionTopParent);
+                /*if(document.querySelector(slideId+'.fb.fb' + i)){
+                  //console.log('top parent .fb'+i+': ',positionTopFbi);
+                  //console.log('left parent .fb'+i+': ', positionLeftFbi);
+                  //console.log('largeur parent .fb'+i+': ', largeurFbi);
+                  //console.log('hauteur parent .fb'+i+': ', hauteurFbi);
+                }*/
+
+              }
+              /* Tester si les parents de .fb.fbi et .move.fbi coîncident et se superposent*/
+              if((positionLeftParent+largeurParent >= positionLeftFbi) && (positionLeftParent+largeurParent <= positionLeftFbi+largeurFbi) && (positionTopParent+hauteurParent >= positionTopFbi) && (positionTopParent+hauteurParent <= positionTopFbi+hauteurFbi)){
+                console.warn('Les éléments parents de .fb.fb'+i+' et de .move.fb'+i+' coïncident et se superposent');
+                moveFbi.classList.add('active');
+                dedans = 1;
+
+              }
+              else{
+                //console.log('Ne se superposent pas ou quitte la zone de déclenchement');
+                if(dedans == 1){
+                  //On quitte la zone de déclenchement
+                  moveFbi.classList.remove('active');
+                  dedans = 2;
+                }
+                else{
+                  //on n'est pas dans la zone de déclenchement
+                  moveFbi.classList.remove('active');
+                }
+              }
+
+            });//fin de surveillerChangementsStyle
+          }//fin de parent (.genially-animated-wrapper)
+        }//fin de groupe
+      }//fin de .move.fbi existe
+
+
 
 
       /* Déclencheurs au survol des éléments fire contenant la classe hover : les écouter et envoyer l'événement feedbackGenially au survol des éléments feedbacks associés*/
