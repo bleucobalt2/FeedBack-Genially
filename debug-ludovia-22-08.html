@@ -122,7 +122,7 @@
 
 
 <div class="aCacher" id="fb" style="background-color:grey;color:white;width:100%; height:100%;overflow:hidden;">FONCTION
-    FEEDBACKS - V1.34 22/08/23
+    FEEDBACKS - V1.35 23/08/23
     <br> OBLIGATOIRE
 </div>
 <script>
@@ -453,17 +453,19 @@
           } else if (document.querySelector(slideId + '.delaiDec')) {
             attendDeclencheFB('.fb' + i, delai * (tousLesFB.length - i) * 1000)
           } else if (document.querySelector(slideId + '.delaiAlea')) {
-            attendDeclencheFB('.fb' + i, delai * Math.floor(Math.random() * tousLesFB.length) * 1000)
+            attendDeclencheFB('.fb' + i, delai * Math.random() * 1000)
           } else if (document.querySelector(slideId + '.delaiAleaInc')) {
             attendDeclencheFB('.fb' + i, delai * Math.floor(Math.random() * tousLesFB.length) * i * 1000)
           } else if (document.querySelector(slideId + '.delaiAleaDec')) {
             attendDeclencheFB('.fb' + i, delai * Math.floor(Math.random() * tousLesFB.length) * (tousLesFB.length - i) * 1000)
             // Debug autovisibilité 15/08, à supprimer si tout va bien
-          } else if (e.target.classList.contains('autoFB')) {
+          }
+          /*else if (e.target.classList.contains('autoFB')) {
             console.log('autovisibilité détectée');
             //onceOrNot = true;
             attendDeclencheFB('.fb' + i);
-          } else {
+          }*/
+          else {
             attendDeclencheFB('.fb' + i);
           }
 
@@ -531,6 +533,10 @@
                 // lancement de l'événement feedbackGenially
                 document.querySelector('.genially-view-slide-container .fb.fb' + i).dispatchEvent(feedBackGenially);
               }
+            });
+            //Rétablissement distribution clic sur le groupe autoFB
+            groupe.addEventListener('click', () => {
+              document.querySelector(slideId + '.fb.fb' + i).dispatchEvent(feedBackGenially);
             });
           }
         }
@@ -723,6 +729,9 @@
         if (!fb.classList.contains('autoFB')) {
           remonteArbre(fb, fb.closest('.genially-animated-wrapper'), desactiveClicDirect);
         }
+        /*else {
+          console.log(''.concat(fb.classList, ' contient autoFB, on ne remonte pas l\'arbre, on laisse le clic direct'));
+        }*/
       }
       if (document.querySelector(slideId + '.fg_global')) {
         let fgGlobal = document.querySelector(slideId + '.fg_global');
