@@ -543,6 +543,7 @@
       }
 
       /*Déclencheurs au mouvement .fire.move.fbi*/
+      /*TODO : vérifier le bon déclenchement au dedans/dehors, modifier l'algorithme de coïncidence?*/
       else if (document.querySelector(slideId + '.move.fb' + i)) {
         console.log('Déclencheur au mouvement détecté');
         let moveFbi = document.querySelector(slideId + '.move.fb' + i);
@@ -654,7 +655,7 @@
     };
 
     /*Fonction remonteArbre(depart, arrive, callback) : remote l'arbre DOM depuis l'élément DOM depart
-      jusqu'à element arrive en applicant un callback à chaque noeud parent*/
+      jusqu'à element arrive en applicant un callback à chaque nœud parent*/
     const remonteArbre = (depart, arrive, callback) => {
       let noeud = depart;
       while (noeud && noeud !== arrive) {
